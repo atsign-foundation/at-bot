@@ -4,17 +4,16 @@ version: 1.0.0
 homepage: https://www.atsign.com
 
 environment:
-  sdk: '>=2.14.2 <3.0.0'
-
+  sdk: ">=2.14.2 <3.0.0"
 
 dependencies:
   dotenv: ^3.0.0
   nyxx: ^2.0.0-rc.15
-  nyxx_commander: ^2.0.0-rc.12
   nyxx_extensions: ^2.0.0-rc.9
   nyxx_interactions: ^2.0.0-rc.23
   nyxx_lavalink: ^2.0.0-rc.3
   path: ^1.8.0
+  color_convert: ^1.0.2
 
 dev_dependencies:
   import_sorter: ^4.6.0

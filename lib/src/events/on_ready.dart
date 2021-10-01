@@ -20,7 +20,8 @@ StreamSubscription<ReadyEvent> onReadyEvent(Nyxx? client) {
       );
       printSuccess('${client.self.tag} is ready to go 🔥');
     } catch (e) {
-      printError('Error on ready event: ${e.toString()}');
+      /// Throw Exception if something goes wrong.
+      throw Exception('Error on ready event : ${e.toString()}');
     }
   });
 }
