@@ -1,18 +1,18 @@
-// 🎯 Dart imports:
-import 'dart:async';
-
 // 📦 Package imports:
 import 'package:nyxx/nyxx.dart' as nyxx;
+import 'package:nyxx/nyxx.dart';
+import 'package:nyxx_interactions/interactions.dart';
 
 // 🌎 Project imports:
-import 'package:at_bot/src/utils/constants.dart';
+import 'package:at_bot/src/utils/constants.util.dart';
 
-/// Add a new role to the user.
-Future<void> addRoleToUser(nyxx.MessageReceivedEvent event, nyxx.Guild guild,
-    List<String>? args) async {
+Future<void> requestRoleToUser(nyxx.MessageReceivedEvent event,
+    nyxx.Guild guild, List<String>? args) async {
   nyxx.Role? role;
   nyxx.User? user;
   try {
+    ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
+
     /// Removing unwanted white spaces.
     args!.removeWhere((String element) => element.isEmpty);
 
@@ -48,17 +48,20 @@ Future<void> addRoleToUser(nyxx.MessageReceivedEvent event, nyxx.Guild guild,
       return;
     }
 
-    /// Fetch the member from the guild.
-    nyxx.Member member = await guild.fetchMember(user!.id);
+    // /// Fetch the member from the guild.
+    // nyxx.Member member = await guild.fetchMember(user!.id);
+    ComponentRowBuilder componentRow = ComponentRowBuilder()
+      ..addComponent(ButtonBuilder(
+          'Accept', 'req_${role!.id}_accept', ComponentStyle.success))
+      ..addComponent(ButtonBuilder(
+          'Reject', 'req_${role.id}_reject', ComponentStyle.danger));
+    componentMessageBuilder.addComponentRow(componentRow);
 
-    /// Remove the role from the member.
-    await member.addRole(role!);
+    /// Remove the role from the member.u
+    // await member.addRole(role!);
 
-    /// Send success message to the user.
-    await event.message.channel.sendMessage(MessageContent.roleAdded(
-      roleName: role.name,
-      userName: user.username,
-    ));
+    await user!.sendMessage(componentMessageBuilder
+      ..content = 'Admin has requested you to join **${role.name}** role.');
   } catch (e) {
     /// Send Exception message to the user.
     await event.message.channel.sendMessage(MessageContent.exception(e));

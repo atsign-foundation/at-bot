@@ -2,11 +2,12 @@
 import 'package:nyxx/nyxx.dart' as nyxx;
 
 // 🌎 Project imports:
-import 'package:at_bot/src/commands/roles/add_role.dart';
-import 'package:at_bot/src/commands/roles/create_role.dart';
-import 'package:at_bot/src/commands/roles/delete_role.dart';
-import 'package:at_bot/src/commands/roles/remove_role.dart';
-import 'package:at_bot/src/utils/constants.dart';
+import 'package:at_bot/src/commands/roles/add.role.dart';
+import 'package:at_bot/src/commands/roles/create.role.dart';
+import 'package:at_bot/src/commands/roles/delete.role.dart';
+import 'package:at_bot/src/commands/roles/remove.role.dart';
+import 'package:at_bot/src/commands/roles/request.role.dart';
+import 'package:at_bot/src/utils/constants.util.dart';
 
 /// Listening to role command in the guild.
 Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args,
@@ -19,6 +20,9 @@ Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args,
       switch (args?.first) {
         case 'add':
           await addRoleToUser(event, guild, args);
+          break;
+        case 'request':
+          await requestRoleToUser(event, guild, args);
           break;
         case 'remove':
           await removeRoleToUser(event, guild, args);

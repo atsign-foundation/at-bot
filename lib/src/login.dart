@@ -9,6 +9,9 @@ Future<Nyxx?> login(String? token, int? privilages) async {
     return Nyxx(
       token,
       privilages!,
+      cacheOptions: CacheOptions()
+        ..memberCachePolicyLocation = CachePolicyLocation.all()
+        ..userCachePolicyLocation = CachePolicyLocation.all(),
       ignoreExceptions: false,
     );
   } catch (e) {

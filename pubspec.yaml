@@ -8,12 +8,8 @@ environment:
 
 dependencies:
   dotenv: ^3.0.0
-  nyxx: ^2.0.0-rc.15
-  nyxx_extensions: ^2.0.0-rc.9
-  nyxx_interactions: ^2.0.0-rc.23
-  nyxx_lavalink: ^2.0.0-rc.3
-  path: ^1.8.0
-  color_convert: ^1.0.2
+  nyxx: ^2.0.1
+  nyxx_interactions: ^2.0.0
 
 dev_dependencies:
   import_sorter: ^4.6.0

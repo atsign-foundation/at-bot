@@ -4,41 +4,41 @@ void println(String text) {
 }
 
 /// Prints the given message to the console as ***`Warning`***.
-void printWarning(String text) {
+void log(String text) {
   print('\x1B[33m$text\x1B[0m');
 }
 
 /// Prints the given message to the console as ***`Warning`*** with the new line.
-void printWarningln(String text) {
-  printWarning('$text\n');
+void logln(String text) {
+  log('$text\n');
 }
 
 /// Prints the given message to the console as ***`Error`***.
-void printError(String text) {
+void error(String text) {
   print('\x1B[31m$text\x1B[0m');
 }
 
 /// Prints the given message to the console as ***`Error`*** with the new line.
-void printErrorln(String text) {
-  printError('$text\n');
+void errorln(String text) {
+  error('$text\n');
 }
 
 /// Prints the given message to the console as ***`Information`***.
-void printInfo(String text) {
+void info(String text) {
   print('\x1B[36m$text\x1B[0m');
 }
 
 /// Prints the given message to the console as ***`Information`*** with the new line.
-void printInfoln(String text) {
-  printInfo('$text\n');
+void infoln(String text) {
+  info('$text\n');
 }
 
 /// Prints the given message to the console as ***`Information`***.
-void printSuccess(String text) {
+void success(String text) {
   print('\x1B[32m$text\x1B[0m');
 }
 
 /// Prints the given message to the console as ***`Information`*** with the new line.
-void printSuccessln(String text) {
-  printSuccess('$text\n');
+void successln(String text) {
+  success('$text\n');
 }

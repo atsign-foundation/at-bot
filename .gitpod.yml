@@ -20,4 +20,4 @@ github:
     # add a label once the prebuild is ready to pull requests
     addLabel: true
 tasks:
-  - init: dart pub get
+  - init: dart pub upgrade --major-versions

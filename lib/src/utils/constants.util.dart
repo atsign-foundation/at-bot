@@ -5,6 +5,8 @@ import 'package:nyxx/nyxx.dart';
 class Constants {
   /// Enviroment variables file name
   static const String envFile = '.bot.env';
+
+  /// Roles colors
   static Map<String, DiscordColor> colors = <String, DiscordColor>{
     /// Represents no color, or integer 0.
     'none': DiscordColor.none,
@@ -173,6 +175,10 @@ class MessageContent {
   static MessageBuilder roleAdded({String? roleName, String? userName}) =>
       _messgaeContent('Role **$roleName** added to **`$userName`**');
 
+  /// Requested the user to join in the role.
+  static MessageBuilder roleRequested({String? roleName}) =>
+      _messgaeContent('Admin has requested you to join **$roleName** role.');
+
   /// Created the role on a request.
   static MessageBuilder roleCreated(String roleName) =>
       _messgaeContent('Role **$roleName** created on request.');
@@ -184,4 +190,18 @@ class MessageContent {
   /// Exception message.
   static MessageBuilder exception(Object? e) =>
       _messgaeContent('Something went wrong. \nException : ${e.toString()}');
+
+  /// Welcome message.
+  static MessageBuilder welcome(User user, Guild guild) => _messgaeContent(
+      'Hello **${user.username}**, Welcome to **${guild.name}**.');
+
+  /// Renaming done.
+  static MessageBuilder renameDone() =>
+      _messgaeContent('Renamed all the nick names.');
+
+  /// Waiting message for long interactions.
+  static MessageBuilder get waiting => _messgaeContent('waiting...');
+
+  /// Custom message.
+  static MessageBuilder custom(String message) => _messgaeContent(message);
 }

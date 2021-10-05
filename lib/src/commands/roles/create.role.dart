@@ -2,7 +2,7 @@
 import 'package:nyxx/nyxx.dart' as nyxx;
 
 // 🌎 Project imports:
-import 'package:at_bot/src/utils/constants.dart';
+import 'package:at_bot/src/utils/constants.util.dart';
 
 /// Create new role for Guild.
 Future<void> createNewRole(nyxx.MessageReceivedEvent event, nyxx.Guild guild,

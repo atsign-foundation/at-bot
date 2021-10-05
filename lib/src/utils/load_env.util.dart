@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:dotenv/dotenv.dart';
 
 // 🌎 Project imports:
-import 'package:at_bot/src/utils/constants.dart';
-import 'package:at_bot/src/utils/custom_print.dart';
+import 'package:at_bot/src/services/logs.dart';
+import 'package:at_bot/src/utils/constants.util.dart';
 
 /// Load all the env variables from `.bot.env` file.
 /// If the file is not found, it will throw an exception.
@@ -19,7 +19,7 @@ Future<void> loadEnv() async {
 
       ///
       if (env['token'] == null) {
-        printError('Missing token in `.bot.env` file');
+        AtBotLogger.log(LogTypeTag.error, 'Missing token in `.bot.env` file');
         exit(-1);
       }
     } else {

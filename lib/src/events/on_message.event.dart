@@ -5,18 +5,18 @@ import 'dart:async';
 import 'package:nyxx/nyxx.dart';
 
 // 🌎 Project imports:
-import 'package:at_bot/src/commands/role.dart';
-import 'package:at_bot/src/utils/custom_print.dart';
+import 'package:at_bot/src/commands/rename.command.dart';
+import 'package:at_bot/src/commands/role.command.dart';
+import 'package:at_bot/src/services/logs.dart';
 
 /// Listening to every message in the guild.
-Future<StreamSubscription<MessageReceivedEvent>> onMessageEvent(
-    Nyxx? client) async {
+Future<void> onMessageEvent(Nyxx? client) async {
   try {
     /// Check if [client] is null.
     if (client == null) throw NullThrownError();
 
     /// Listening on message recived.
-    return client.onMessageReceived.listen((MessageReceivedEvent event) async {
+    client.onMessageReceived.listen((MessageReceivedEvent event) async {
       /// This makes your bot ignore other bots and itself
       /// and not get into a spam loop (we call that "botception").
       if (event.message.author.bot) return;
@@ -53,7 +53,7 @@ Future<StreamSubscription<MessageReceivedEvent>> onMessageEvent(
 
           /// Check if the command is ding ping.
           case 'rename':
-            await onRenameCommand(event);
+            await onRenameCommand(event, arguments);
             break;
 
           /// Check if the command is unknown.
@@ -65,11 +65,7 @@ Future<StreamSubscription<MessageReceivedEvent>> onMessageEvent(
       }
     });
   } catch (e) {
-    printError(e.toString());
+    AtBotLogger.log(LogTypeTag.error, e.toString());
     throw Exception(e.toString());
   }
-}
-
-Future<Message> onRenameCommand(MessageReceivedEvent event) {
-  return event.message.channel.sendMessage(MessageBuilder.content('Dong!'));
 }
