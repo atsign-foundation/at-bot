@@ -12,6 +12,8 @@ Future<void> addRoleToUser(nyxx.MessageReceivedEvent event, nyxx.Guild guild,
     List<String>? args) async {
   nyxx.Role? role;
   nyxx.User? user;
+  RegExp _regExp = RegExp(r'\[\S*\] ');
+  String removeStuff(String input) => input.replaceAll(_regExp, '');
   try {
     /// Removing unwanted white spaces.
     args!.removeWhere((String element) => element.isEmpty);
@@ -51,8 +53,23 @@ Future<void> addRoleToUser(nyxx.MessageReceivedEvent event, nyxx.Guild guild,
     /// Fetch the member from the guild.
     nyxx.Member member = await guild.fetchMember(user!.id);
 
+    /// Get member nickname.
+    String? memNickName = member.nickname;
+
+    /// If nickname is null, get user name.
+    memNickName ??= user.username;
+
+    /// Trim the role to first 3 letters of the role name.
+    String roleNickName = role!.name.substring(0, 3).toUpperCase();
+
+    /// If the member has already a nickname and it has `[something]`,
+    /// replace that with ''.
+    memNickName = removeStuff(memNickName);
+
     /// Remove the role from the member.
-    await member.addRole(role!);
+    await member.addRole(role);
+
+    await member.edit(nick: '[$roleNickName] $memNickName');
 
     /// Send user a message to inbox.
     await user.sendMessage(MessageContent.roleAdded(

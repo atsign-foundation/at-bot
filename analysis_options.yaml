@@ -22,25 +22,24 @@ linter:
     camel_case_types: true
     empty_constructor_bodies: true
     prefer_const_constructors: true
-    sort_constructors_first: false
+    sort_constructors_first: true
     prefer_single_quotes: true
     avoid_empty_else: true
     cancel_subscriptions: true
     close_sinks: true
     prefer_conditional_assignment: true
     cast_nullable_to_non_nullable: true
-    omit_local_variable_types: false
     avoid_returning_null_for_future: true
     always_declare_return_types: true
     avoid_returning_null: true
     avoid_returning_null_for_void: true
     avoid_returning_this: true
-    implementation_imports: false
+    implementation_imports: true
     avoid_void_async: true
     unawaited_futures: true
     await_only_futures: true
     unnecessary_lambdas: true
     unnecessary_await_in_return: true
     unnecessary_final: true
-    sort_pub_dependencies: false
+    sort_pub_dependencies: true
     package_names: true
