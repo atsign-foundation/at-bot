@@ -1,0 +1,28 @@
+name: Dart bot workflow
+
+on:
+  push:
+    branches: [dart-trunk]
+  pull_request:
+    branches: [dart-trunk]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installing dart
+      - uses: actions/checkout@v2
+      # Setup dart.
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      # Fetch pub dependecies.
+      - name: Install dependencies
+        run: dart pub get
+      # Verify formatting.
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+      # Analyze the code.
+      - name: Analyze project source
+        run: dart analyze
+      # Run unit tests.
+      - name: Run tests
+        run: dart test
