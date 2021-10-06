@@ -1,0 +1,32 @@
+name: Dart bot workflow
+
+on:
+  push:
+    branches: [dart-trunk]
+  pull_request:
+    branches: [dart-trunk]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        sdk: [stable, beta, dev, 2.10.3, 2.12.0-29.10.beta]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      # Fetch pub dependecies.
+      - name: Install dependencies
+        run: dart pub get
+      # Verify formatting.
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+      # Analyze the code.
+      - name: Analyze project source
+        run: dart analyze
+      # Run unit tests.
+      - name: Run tests
+        run: dart test
