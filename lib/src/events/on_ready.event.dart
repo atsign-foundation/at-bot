@@ -17,16 +17,13 @@ Future<void> onReadyEvent(Nyxx? client) async {
       client.setPresence(
         PresenceBuilder.of(
           status: UserStatus.online,
-          activity: ActivityBuilder.listening('@signs')
-            ..url = 'https://atsign.com/',
+          activity: ActivityBuilder.listening('@signs')..url = 'https://atsign.com/',
         ),
       );
-      AtBotLogger.log(
-          LogTypeTag.success, '${client.self.tag} is ready to go 🔥');
+      AtBotLogger.logln(LogTypeTag.success, '${client.self.tag} is ready to go 🔥');
     } catch (e) {
       /// Throw Exception if something goes wrong.
-      AtBotLogger.log(LogTypeTag.error, e.toString());
-      // throw Exception('Error on ready event : ${e.toString()}');
+      AtBotLogger.logln(LogTypeTag.error, e.toString());
     }
   });
 }

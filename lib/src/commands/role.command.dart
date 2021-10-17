@@ -10,8 +10,7 @@ import 'package:at_bot/src/commands/roles/request.role.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
 
 /// Listening to role command in the guild.
-Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args,
-    nyxx.Permissions? permissions,
+Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args, nyxx.Permissions? permissions,
     {nyxx.Nyxx? client}) async {
   nyxx.Guild guild = (event.message as nyxx.GuildMessage).guild.getFromCache()!;
   if (permissions != null) {
@@ -21,19 +20,18 @@ Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args,
         case 'add':
           await addRoleToUser(event, guild, args);
           break;
-        case 'request':
-          await requestRoleToUser(event, guild, args);
-          break;
-        case 'remove':
-          await removeRoleToUser(event, guild, args);
-          break;
         case 'create':
           await createNewRole(event, guild, args);
           break;
         case 'delete':
           await deleteNewRole(event, guild, args);
           break;
-        default:
+        case 'remove':
+          await removeRoleToUser(event, guild, args);
+          break;
+        case 'request':
+          await requestRoleToUser(event, guild, args);
+          break;
       }
     } else
 

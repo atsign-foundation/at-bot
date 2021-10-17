@@ -1,10 +1,18 @@
 // 📦 Package imports:
+import 'dart:math';
+
 import 'package:nyxx/nyxx.dart';
 
 /// Bot general constants
 class Constants {
   /// Enviroment variables file name
   static const String envFile = '.bot.env';
+
+  /// Reg for finding role in user nickname
+  static final RegExp _regExp = RegExp(r'\[\S*\] ');
+
+  /// Remoive that role from user nickname
+  static String? removeStuff(String input) => input.replaceAll(_regExp, '');
 
   /// Roles colors
   static Map<String, DiscordColor> colors = <String, DiscordColor>{
@@ -156,16 +164,13 @@ class MessageContent {
   }
 
   /// User need to be admin.
-  static MessageBuilder get needToBeAdmin =>
-      _messgaeContent('You need to be an admin to use this command');
+  static MessageBuilder get needToBeAdmin => _messgaeContent('You need to be an admin to use this command');
 
   /// Don't DM commands please.
-  static MessageBuilder get noDMs =>
-      _messgaeContent('Sorry you can\'t use this command in DMs.');
+  static MessageBuilder get noDMs => _messgaeContent('Sorry you can\'t use this command in DMs.');
 
   /// Don't use element ID in commands please.
-  static MessageBuilder get noIdPlease =>
-      _messgaeContent('Sorry, I don\'t support ID.');
+  static MessageBuilder get noIdPlease => _messgaeContent('Sorry, I don\'t support ID.');
 
   /// Removed the role from an user.
   static MessageBuilder roleRemoved({String? roleName, String? userName}) =>
@@ -180,28 +185,41 @@ class MessageContent {
       _messgaeContent('Admin has requested you to join **$roleName** role.');
 
   /// Created the role on a request.
-  static MessageBuilder roleCreated(String roleName) =>
-      _messgaeContent('Role **$roleName** created on request.');
+  static MessageBuilder roleCreated(String roleName) => _messgaeContent('Role **$roleName** created on request.');
 
   /// Deleted the role on a request from guild.
-  static MessageBuilder roleDeleted(String roleName) =>
-      _messgaeContent('Role **`$roleName`** deleted on request.');
+  static MessageBuilder roleDeleted(String roleName) => _messgaeContent('Role **`$roleName`** deleted on request.');
 
   /// Exception message.
-  static MessageBuilder exception(Object? e) =>
-      _messgaeContent('Something went wrong. \nException : ${e.toString()}');
+  static MessageBuilder exception(Object? e) => _messgaeContent('Something went wrong. \nException : ${e.toString()}');
 
   /// Welcome message.
-  static MessageBuilder welcome(User user, Guild guild) => _messgaeContent(
-      'Hello **${user.username}**, Welcome to **${guild.name}**.');
+  static MessageBuilder welcome(User user, Guild guild) =>
+      _messgaeContent('Hello **${user.username}**, Welcome to **${guild.name}**.');
 
   /// Renaming done.
-  static MessageBuilder renameDone() =>
-      _messgaeContent('Renamed all the nick names.');
+  static MessageBuilder renameDone() => _messgaeContent('Renamed all the nick names.');
 
   /// Waiting message for long interactions.
   static MessageBuilder get waiting => _messgaeContent('waiting...');
 
   /// Custom message.
   static MessageBuilder custom(String message) => _messgaeContent(message);
+}
+
+String millisToMinutesAndSeconds(int millis) {
+  int minutes = (millis / 60000).floor();
+  int seconds = ((millis % 60000) / 1000).floor();
+  return '$minutes : $seconds';
+}
+
+String generateRandomToken(int length) {
+  String alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+  Random rng = Random();
+  StringBuffer token = StringBuffer();
+  for (int i = 0; i < length; i++) {
+    token.write(alphabet[rng.nextInt(alphabet.length)]);
+  }
+  print(token.toString());
+  return token.toString();
 }

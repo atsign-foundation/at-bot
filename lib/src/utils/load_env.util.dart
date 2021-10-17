@@ -19,7 +19,7 @@ Future<void> loadEnv() async {
 
       ///
       if (env['token'] == null) {
-        AtBotLogger.log(LogTypeTag.error, 'Missing token in `.bot.env` file');
+        AtBotLogger.logln(LogTypeTag.error, 'Missing token in `.bot.env` file');
         exit(-1);
       }
     } else {

@@ -2,15 +2,18 @@
 import 'dart:async';
 
 // 📦 Package imports:
+import 'package:at_bot/src/commands/music.command.dart';
+import 'package:at_bot/src/utils/constants.util.dart';
 import 'package:nyxx/nyxx.dart';
 
 // 🌎 Project imports:
 import 'package:at_bot/src/commands/rename.command.dart';
 import 'package:at_bot/src/commands/role.command.dart';
 import 'package:at_bot/src/services/logs.dart';
+import 'package:nyxx_lavalink/lavalink.dart';
 
 /// Listening to every message in the guild.
-Future<void> onMessageEvent(Nyxx? client) async {
+Future<void> onMessageEvent(Nyxx? client, {Cluster? cluster}) async {
   try {
     /// Check if [client] is null.
     if (client == null) throw NullThrownError();
@@ -36,9 +39,7 @@ Future<void> onMessageEvent(Nyxx? client) async {
 
         /// Check if the message is GuildMessage, if not, return null.
         /// else return the member.
-        Member? member = event.message is GuildMessage
-            ? (event.message as GuildMessage).member
-            : null;
+        Member? member = event.message is GuildMessage ? (event.message as GuildMessage).member : null;
 
         /// Get the user permissions.
         Permissions? permissions = await member?.effectivePermissions;
@@ -56,16 +57,35 @@ Future<void> onMessageEvent(Nyxx? client) async {
             await onRenameCommand(event, arguments);
             break;
 
+          /// Check if the command is ding ping.
+          case 'music':
+          case 'm':
+            await onMusicCommand(event, arguments, cluster: cluster);
+            break;
+          case 'node':
+            if (arguments.isEmpty) {
+              await event.message.channel
+                  .sendMessage(MessageContent.custom('Kill argument to kill the nodes (Not at all prefered).'));
+            }
+            if (arguments[0] == 'kill') {
+              bool? nodesKilled = cluster?.connectedNodes.entries.any((MapEntry<int, Node> element) {
+                element.value.disconnect();
+                return true;
+              });
+              await event.message.channel
+                  .sendMessage(MessageContent.custom(nodesKilled! ? 'Killed all nodes.' : 'Killed no nodes'));
+            }
+            break;
+
           /// Check if the command is unknown.
           default:
-            await event.message.channel
-                .sendMessage(MessageBuilder.content('Unknown command'));
+            await event.message.channel.sendMessage(MessageBuilder.content('Unknown command'));
             break;
         }
       }
     });
   } catch (e) {
-    AtBotLogger.log(LogTypeTag.error, e.toString());
+    AtBotLogger.logln(LogTypeTag.error, e.toString());
     throw Exception(e.toString());
   }
 }

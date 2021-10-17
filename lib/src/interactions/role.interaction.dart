@@ -1,6 +1,6 @@
 // 📦 Package imports:
 import 'package:dotenv/dotenv.dart';
-import 'package:nyxx/nyxx.dart';
+import 'package:nyxx/nyxx.dart' as nyxx;
 import 'package:nyxx_interactions/interactions.dart';
 
 // 🌎 Project imports:
@@ -8,8 +8,8 @@ import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
 
 /// If the user accepts the role request, the bot will add the role to the user.
-Future<void> onRoleRequestAccept(Guild guild, String id, Member mem, User user,
-    Message invitationMsg, ButtonInteractionEvent event, Role? role) async {
+Future<void> onRoleRequestAccept(nyxx.Guild guild, String id, nyxx.Member mem, nyxx.User user,
+    nyxx.Message invitationMsg, ButtonInteractionEvent event, nyxx.Role? role) async {
   try {
     /// Get member nickname.
     String? memNickName = mem.nickname;
@@ -22,52 +22,84 @@ Future<void> onRoleRequestAccept(Guild guild, String id, Member mem, User user,
 
     /// If the member has already a nickname and it has `[something]`,
     /// replace that with ''.
-    if (memNickName.contains(RegExp('/[(.*?)]/g'))) {
-      memNickName.replaceAll(RegExp('/[(.*?)]/g'), '');
-    }
-
-    /// Adding member a role.
-    await mem.addRole(role);
-
-    /// Adding memeber a nickname.
-    await mem.edit(nick: '[$roleNickName] $memNickName');
-
-    /// Delete the request message.
-    await invitationMsg.delete().then(
-          /// Send thanking message.
-          (_) async => event.interaction.message!.channel.sendMessage(
-            MessageContent.custom(
-              'Thanks for accepting the Request',
-            ),
-          ),
-        );
-
-    /// Log the user interaction.
-    AtBotLogger.log(LogTypeTag.info,
-        '${user.username} has accepted the ${role.name} role request.');
+    memNickName = Constants.removeStuff(memNickName);
+    bool userHasRole =
+        mem.roles.where((nyxx.Cacheable<nyxx.Snowflake, nyxx.Role> element) => element.id == role.id).isNotEmpty;
 
     /// Check for the moderator channel or bot channel.
-    Iterable<GuildChannel> modChannel = guild.channels.where(
-      (GuildChannel channel) =>
-          (channel.id.toString() == env['mod_channel_id'] ||
-              channel.id.toString() == env['bot_channel_id']),
+    Iterable<nyxx.GuildChannel> modChannel = guild.channels.where(
+      (nyxx.GuildChannel channel) =>
+          (channel.id.toString() == env['mod_channel_id'] || channel.id.toString() == env['bot_channel_id']),
     );
 
-    /// If modChannel list is empty throw error in the console.
-    if (modChannel.isEmpty) {
-      AtBotLogger.log(
-          LogTypeTag.info, 'Cannot find a moderator channel to initmate.');
-      return;
+    if (userHasRole) {
+      if (modChannel.isEmpty) {
+        AtBotLogger.logln(LogTypeTag.warning, '${user.username} already has ${role.name} role.');
+
+        /// Delete the request message.
+        await invitationMsg.delete().then(
+              /// Send thanking message.
+              (_) async => event.interaction.message!.channel.sendMessage(
+                MessageContent.custom(
+                  'Sorry, Looks like you already have this role. Admin might got confused.',
+                ),
+              ),
+            );
+        return;
+      } else {
+        /// Notify the mods about the user interaction.
+        if (event.interaction.customId.startsWith('req_')) {
+          await (modChannel.first as nyxx.TextChannel).sendMessage(
+            MessageContent.custom('**${user.username}** already has **${role.name}** role.'),
+          );
+          AtBotLogger.logln(LogTypeTag.warning, '${user.username} already has ${role.name} role. ');
+        }
+
+        /// Delete the request message.
+        await invitationMsg.delete().then(
+              /// Send thanking message.
+              (_) async => event.interaction.message!.channel.sendMessage(
+                MessageContent.custom(
+                  'Sorry, Looks like you already have this role. Admin might got confused.',
+                ),
+              ),
+            );
+      }
+    } else {
+      /// Adding member a role.
+      await mem.addRole(role);
+
+      /// Delete the request message.
+      await invitationMsg.delete().then(
+            /// Send thanking message.
+            (_) async => event.interaction.message!.channel.sendMessage(
+              MessageContent.custom(
+                'Thanks for accepting the Request',
+              ),
+            ),
+          );
+
+      /// If modChannel list is empty throw error in the console.
+      if (modChannel.isEmpty) {
+        AtBotLogger.logln(LogTypeTag.info, 'Cannot find a moderator channel to initmate.');
+        return;
+      } else {
+        /// Notify the mods about the user interaction.
+        if (event.interaction.customId.startsWith('req_')) {
+          /// Adding memeber a nickname.
+          await mem.edit(nick: '[$roleNickName] $memNickName');
+          await (modChannel.first as nyxx.TextChannel).sendMessage(
+            MessageContent.custom('**${user.username}** has accepted the **${role.name}** role request.'),
+          );
+
+          /// Log the user interaction.
+          AtBotLogger.logln(LogTypeTag.info, '${user.username} has accepted the ${role.name} role request.');
+        }
+      }
     }
-
-    /// Notify the mods about the user interaction.
-    await (modChannel.first as TextChannel).sendMessage(
-      MessageContent.custom(
-          '**${user.username}** has accepted the **${role.name}** role request.'),
-    );
   } catch (e) {
     /// Log the Exception.
-    AtBotLogger.log(LogTypeTag.error, e.toString());
+    AtBotLogger.logln(LogTypeTag.error, e.toString());
     return;
   }
 }
