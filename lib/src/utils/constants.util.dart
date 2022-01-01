@@ -2,9 +2,24 @@
 import 'dart:math';
 
 import 'package:nyxx/nyxx.dart';
+import 'package:dotenv/dotenv.dart';
 
 /// Bot general constants
 class Constants {
+  static bool h = false;
+  static IMessage? msg;
+  static const String rootDomain = 'root.atsign.org';
+  static const int port = 64;
+  static const String domain = 'my.atsign.com';
+  static const String path = '/api/app/v2/';
+  static const String getFreeAtSign = 'get-free-atsign';
+  static const String registerAtSign = 'register-person';
+  static const String validateOTP = 'validate-person';
+  static String apiKey() =>
+      env['API_KEY'] ?? const String.fromEnvironment('current-version');
+  static final RegExp emailRegExp = RegExp(
+      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+
   /// Enviroment variables file name
   static const String envFile = '.bot.env';
 
@@ -164,13 +179,16 @@ class MessageContent {
   }
 
   /// User need to be admin.
-  static MessageBuilder get needToBeAdmin => _messgaeContent('You need to be an admin to use this command');
+  static MessageBuilder get needToBeAdmin =>
+      _messgaeContent('You need to be an admin to use this command');
 
   /// Don't DM commands please.
-  static MessageBuilder get noDMs => _messgaeContent('Sorry you can\'t use this command in DMs.');
+  static MessageBuilder get noDMs =>
+      _messgaeContent('Sorry you can\'t use this command in DMs.');
 
   /// Don't use element ID in commands please.
-  static MessageBuilder get noIdPlease => _messgaeContent('Sorry, I don\'t support ID.');
+  static MessageBuilder get noIdPlease =>
+      _messgaeContent('Sorry, I don\'t support ID.');
 
   /// Removed the role from an user.
   static MessageBuilder roleRemoved({String? roleName, String? userName}) =>
@@ -185,20 +203,24 @@ class MessageContent {
       _messgaeContent('Admin has requested you to join **$roleName** role.');
 
   /// Created the role on a request.
-  static MessageBuilder roleCreated(String roleName) => _messgaeContent('Role **$roleName** created on request.');
+  static MessageBuilder roleCreated(String roleName) =>
+      _messgaeContent('Role **$roleName** created on request.');
 
   /// Deleted the role on a request from guild.
-  static MessageBuilder roleDeleted(String roleName) => _messgaeContent('Role **`$roleName`** deleted on request.');
+  static MessageBuilder roleDeleted(String roleName) =>
+      _messgaeContent('Role **`$roleName`** deleted on request.');
 
   /// Exception message.
-  static MessageBuilder exception(Object? e) => _messgaeContent('Something went wrong. \nException : ${e.toString()}');
+  static MessageBuilder exception(Object? e) =>
+      _messgaeContent('Something went wrong. \nException : ${e.toString()}');
 
   /// Welcome message.
-  static MessageBuilder welcome(User user, Guild guild) =>
-      _messgaeContent('Hello **${user.username}**, Welcome to **${guild.name}**.');
+  static MessageBuilder welcome(IUser user, IGuild guild) => _messgaeContent(
+      'Hello **${user.username}**, Welcome to **${guild.name}**.');
 
   /// Renaming done.
-  static MessageBuilder renameDone() => _messgaeContent('Renamed all the nick names.');
+  static MessageBuilder renameDone() =>
+      _messgaeContent('Renamed all the nick names.');
 
   /// Waiting message for long interactions.
   static MessageBuilder get waiting => _messgaeContent('waiting...');
@@ -222,4 +244,12 @@ String generateRandomToken(int length) {
   }
   print(token.toString());
   return token.toString();
+}
+
+class Commands {
+  static const String music = 'music';
+  static const String rename = 'rename';
+  static const String role = 'role';
+  static const String node = 'node';
+  static const String getAtSign = 'get';
 }

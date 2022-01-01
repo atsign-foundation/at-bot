@@ -56,7 +56,7 @@ class AtBotLogger {
 
 /// Sends the message to the channel and logs it.
 Future<void> logAndSendMessage(
-    MessageReceivedEvent event, MessageBuilder messageBuilder, LogTypeTag logType, String logMessage) async {
+    IMessageReceivedEvent event, MessageBuilder messageBuilder, LogTypeTag logType, String logMessage) async {
   await event.message.channel.sendMessage(messageBuilder);
   AtBotLogger.logln(logType, logMessage);
 }

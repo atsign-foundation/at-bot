@@ -5,11 +5,11 @@ import 'package:nyxx/nyxx.dart';
 import 'package:at_bot/src/services/logs.dart';
 
 /// Login the discord bot with the given token as parameter
-Future<Nyxx?> login(String? token, int? privilages) async {
+Future<INyxxWebsocket?> login(String? token, int? privilages) async {
   try {
     /// Check if [token] is null. If null, Throw [MissingTokenError].
     if (token == null) throw MissingTokenError();
-    return Nyxx(
+    return NyxxFactory.createNyxxWebsocket(
       token,
       privilages!,
       cacheOptions: CacheOptions()

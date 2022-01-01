@@ -10,9 +10,10 @@ import 'package:at_bot/src/commands/roles/request.role.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
 
 /// Listening to role command in the guild.
-Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args, nyxx.Permissions? permissions,
-    {nyxx.Nyxx? client}) async {
-  nyxx.Guild guild = (event.message as nyxx.GuildMessage).guild.getFromCache()!;
+Future<void> onRoleCommand(nyxx.IMessageReceivedEvent event, List<String>? args,
+    nyxx.IPermissions? permissions,
+    {nyxx.INyxxWebsocket? client}) async {
+  nyxx.IGuild guild = event.message.guild!.getFromCache()!;
   if (permissions != null) {
     /// If user has permissions to use this command.
     if (permissions.administrator) {
@@ -44,7 +45,7 @@ Future<void> onRoleCommand(nyxx.MessageReceivedEvent event, List<String>? args, 
 
   /// However if permissions is null, that means member might be null.
   /// So we check if the command is used in bot's inbox.
-  if (event.message is nyxx.DMMessage) {
+  if (event.message.guild == null) {
     /// Send message to the user.
     await event.message.channel.sendMessage(MessageContent.noDMs);
   }

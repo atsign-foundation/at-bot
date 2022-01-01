@@ -7,23 +7,27 @@ import 'package:nyxx/nyxx.dart';
 // 🌎 Project imports:
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
-import 'package:nyxx_interactions/interactions.dart';
+import 'package:nyxx_interactions/nyxx_interactions.dart';
 
 /// Listening to new user joining to the server.
-Future<StreamSubscription<GuildMemberAddEvent>> onMemberJoined(Nyxx? client) async {
-  return client!.onGuildMemberAdd.listen((GuildMemberAddEvent event) async {
+Future<StreamSubscription<IGuildMemberAddEvent>> onMemberJoined(
+    INyxxWebsocket? client) async {
+  return client!.eventsWs.onGuildMemberAdd.listen(
+      (IGuildMemberAddEvent event) async {
     /// Get user object
-    User user = event.user;
+    IUser user = event.user;
 
     /// If user is a bot, return.
     if (user.bot) return;
 
     /// Get guild object
-    Guild guild = event.guild.getFromCache()!;
+    IGuild guild = event.guild.getFromCache()!;
     try {
-      ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
+      ComponentMessageBuilder componentMessageBuilder =
+          ComponentMessageBuilder();
       ComponentRowBuilder componentRow = ComponentRowBuilder()
-        ..addComponent(ButtonBuilder('Accept', 'welcome_accept', ComponentStyle.success));
+        ..addComponent(
+            ButtonBuilder('Accept', 'welcome_accept', ComponentStyle.success));
       componentMessageBuilder.addComponentRow(componentRow);
 
       /// Send member a welcome message to their inbox
@@ -33,7 +37,8 @@ Future<StreamSubscription<GuildMemberAddEvent>> onMemberJoined(Nyxx? client) asy
         ),
       );
       await user.sendMessage(componentMessageBuilder
-        ..content = 'Please go through <#778383211712741457> channel and accepet the Rules and Conditions 😀.');
+        ..content =
+            'Please go through <#778383211712741457> channel and accepet the Rules and Conditions 😀.');
     } catch (e) {
       /// Print error to console and throw Exception.
       AtBotLogger.logln(LogTypeTag.error, e.toString());

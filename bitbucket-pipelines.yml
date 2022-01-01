@@ -1,0 +1,30 @@
+# Docker image for Dart from Google Container Registry.
+# https://hub.docker.com/r/google/dart.
+image: google/dart
+
+pipelines:
+  branches:
+    # Main branch pipeline.
+    dart-trunk:
+      # Analyze dart code.
+      - step:
+          name: Analyzing the code
+          script:
+            # Fetch the dart version.
+            - dart --version
+            # Fetch pub dependecies.
+            - dart pub get
+            # Analyze the pushed code.
+            - dart analyze
+      # # Run the unit tests.
+      # - step:
+      #     name: Running unit tests
+      #     script:
+      #       # Fetch the dart version.
+      #       - dart --version
+      #       # Fetch pub dependecies.
+      #       - dart pub get
+      #       # Adding env variables.
+      #       - echo $BOT_ENV > .bot.env
+      #       # Run the unit tests.
+      #       - dart test --verbose-trace
