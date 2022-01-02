@@ -12,6 +12,24 @@ class AtSignService {
   AtSignService._internal();
   static Future<void> validateEmail(
       List<String> arguments, IMessageReceivedEvent event) async {
+    if (arguments.length < 2 &&
+        consts.Constants.emailRegExp.hasMatch(arguments[1])) {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          '@ Looks like you are missing @sign.',
+        ),
+      );
+      return;
+    } else if (arguments.length == 2 &&
+        !consts.Constants.emailRegExp.hasMatch(arguments[0]) &&
+        arguments[1].startsWith('@')) {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          '@ Looks like your email is wrong.',
+        ),
+      );
+      return;
+    }
     bool registered =
         await AtSignAPI.registerAtSign(arguments[0], arguments[1]);
     await event.message.channel.sendMessage(
