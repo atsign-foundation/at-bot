@@ -1,0 +1,1 @@
+worker: ./dart-sdk/bin/dart ./bin/at_bot.dart

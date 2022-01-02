@@ -23,7 +23,7 @@ class AtSignService {
     );
     await event.message.channel.sendMessage(
       consts.MessageContent.custom(
-        'OTP will be sent to your mail shortly.',
+        'OTP will be sent to your mail shortly.\nUse `!otp <@sign> <email> <OTP>` to verify your email.',
       ),
     );
   }
