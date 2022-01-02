@@ -16,7 +16,7 @@ import 'package:nyxx_lavalink/nyxx_lavalink.dart';
 Future<void> buttonInteraction(IButtonInteractionEvent event,
     {ICluster? cluster}) async {
   try {
-    IMessage? musicMsg;
+    // IMessage? musicMsg;
 
     /// Get the interaction ID
     String id = event.interaction.customId;
@@ -106,7 +106,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
           ..addComponent(
             ButtonBuilder(
               'Confirm',
-              'confirmAtSign',
+              'confirmAtSign_$selectedAtSign',
               ComponentStyle.success,
               disabled: true,
             ),
@@ -121,40 +121,46 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
             'Please enter your email to activate `$selectedAtSign`.\n**NOTE :** Use `!email YOUR_MAIL YOUR_@SIGN` to submit mail id.\nWe don\'t save any of your data.');
     } else if (id == 'changeAtSign') {
       String atSign = await AtSignAPI.getNewAtsign();
+      ComponentMessageBuilder newAtSignMsgBuilder = ComponentMessageBuilder();
+      newAtSignMsgBuilder.addComponentRow(ComponentRowBuilder()
+        ..addComponent(ButtonBuilder(
+            'Change @sign', 'changeAtSign', ComponentStyle.primary))
+        ..addComponent(ButtonBuilder(
+            'Confirm', 'confirmAtSign_$atSign', ComponentStyle.success)));
       await event.acknowledge();
       await event.interaction.message!.edit(
-          con.MessageContent.custom('Awesome, We got `$atSign` for you.'));
+          newAtSignMsgBuilder..content = 'Awesome, We got `$atSign` for you.');
       return;
     }
     IGuild? guild = event.interaction.guild == null
         ? null
         : event.interaction.guild!.getFromCache();
 
-    INode node = cluster!.getOrCreatePlayerNode(guild!.id);
-    EmbedBuilder embed = EmbedBuilder();
-    IVoiceState? userState;
-    guild.voiceStates.forEach((Snowflake key, IVoiceState value) {
-      if (value.user.id == event.interaction.memberAuthor?.id) {
-        userState = value;
-      }
-    });
-    IVoiceState? botState;
-    guild.voiceStates.forEach((Snowflake key, IVoiceState value) {
-      if (value.user.id == guild.selfMember.id) {
-        botState = value;
-      }
-    });
-    List<List<ButtonBuilder>> components = <List<ButtonBuilder>>[
-      <ButtonBuilder>[
-        ButtonBuilder('⏮', 'seek', ComponentStyle.secondary),
-        ButtonBuilder('▶', 'resume', ComponentStyle.secondary),
-        ButtonBuilder('⏸', 'pause', ComponentStyle.secondary),
-        ButtonBuilder('⏭', 'skip', ComponentStyle.secondary),
-      ]
-    ];
-    ComponentMessageBuilder messageBuilder = ComponentMessageBuilder()
-      ..embeds = <EmbedBuilder>[embed]
-      ..componentRows = components;
+    // INode node = cluster!.getOrCreatePlayerNode(guild!.id);
+    // EmbedBuilder embed = EmbedBuilder();
+    // IVoiceState? userState;
+    // guild.voiceStates.forEach((Snowflake key, IVoiceState value) {
+    //   if (value.user.id == event.interaction.memberAuthor?.id) {
+    //     userState = value;
+    //   }
+    // });
+    // IVoiceState? botState;
+    // guild.voiceStates.forEach((Snowflake key, IVoiceState value) {
+    //   if (value.user.id == guild.selfMember.id) {
+    //     botState = value;
+    //   }
+    // });
+    // List<List<ButtonBuilder>> components = <List<ButtonBuilder>>[
+    //   <ButtonBuilder>[
+    //     ButtonBuilder('⏮', 'seek', ComponentStyle.secondary),
+    //     ButtonBuilder('▶', 'resume', ComponentStyle.secondary),
+    //     ButtonBuilder('⏸', 'pause', ComponentStyle.secondary),
+    //     ButtonBuilder('⏭', 'skip', ComponentStyle.secondary),
+    //   ]
+    // ];
+    // ComponentMessageBuilder messageBuilder = ComponentMessageBuilder()
+    //   ..embeds = <EmbedBuilder>[embed]
+    //   ..componentRows = components;
 
     /// If action is role request
     if (action == 'req') {
@@ -163,7 +169,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
 
       /// Get the role from the guild.
       IRole? role;
-      guild.roles.forEach((Snowflake key, IRole value) {
+      guild?.roles.forEach((Snowflake key, IRole value) {
         if (value.id.toString().compareTo(btnRoleID) == 0) {
           role = value;
         }
@@ -175,10 +181,11 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
         String userInteraction = id.split('_')[2];
 
         /// Fetch the member from the guild.
-        IMember mem = await guild.fetchMember(event.interaction.userAuthor!.id);
+        IMember? mem =
+            await guild?.fetchMember(event.interaction.userAuthor!.id);
 
         /// Fetch the user from the member.
-        IUser? user = mem.user.getFromCache();
+        IUser? user = mem?.user.getFromCache();
 
         /// User interacted message.
         IMessage? invitationMsg = event.interaction.message;
@@ -186,7 +193,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
         /// If the interaction type is accept.
         if (userInteraction == 'accept') {
           await onRoleRequestAccept(
-              guild, id, mem, user!, invitationMsg!, event, role);
+              guild!, id, mem!, user!, invitationMsg!, event, role);
         } else
 
         /// If the interaction type is reject.
@@ -199,7 +206,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
               );
 
           /// Try getting a moderator/bots channel.
-          Iterable<IGuildChannel> modChannel = guild.channels.where(
+          Iterable<IGuildChannel>? modChannel = guild?.channels.where(
             (IGuildChannel channel) =>
                 (channel.id.toString() == env['mod_channel_id'] ||
                     channel.id.toString() == env['bot_channel_id']),
@@ -210,7 +217,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
               '${user!.username} has rejected the ${role?.name} role request.');
 
           /// If modChannel is empty.
-          if (modChannel.isEmpty) {
+          if (modChannel!.isEmpty) {
             AtBotLogger.logln(LogTypeTag.info,
                 'Cannot find a moderator channel to initmate.');
             return;
@@ -223,158 +230,161 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
           );
         }
       }
-    } else if (action == 'welcome') {
-      try {
-        String actionType = id.split('_')[1];
-        if (actionType == 'accept') {
-          IRole? role;
-          guild.roles.forEach((Snowflake key, IRole value) {
-            if (value.name.toString().toLowerCase().compareTo('member') == 0) {
-              role = value;
-            }
-          });
-
-          /// Fetch the member from the guild.
-          IMember mem =
-              await guild.fetchMember(event.interaction.userAuthor!.id);
-
-          /// Fetch the user from the member.
-          IUser? user = mem.user.getFromCache();
-
-          /// User interacted message.
-          IMessage? invitationMsg = event.interaction.message;
-          await onRoleRequestAccept(
-              guild, id, mem, user!, invitationMsg!, event, role);
-        }
-      } on Exception catch (e) {
-        AtBotLogger.logln(LogTypeTag.error, e.toString());
-        return;
-      }
-    } else if (action == 'pause') {
-      if (userState == null || userState?.channel == null) {
-        await event.interaction.message!.channel.sendMessage(
-          con.MessageContent.custom(
-              'You need to be connected to a voice chat to use this command'),
-        );
-        return;
-      }
-      if (botState == null && botState!.channel != null) {
-        await event.interaction.message!.channel.sendMessage(
-            MessageBuilder.content(
-                "I'm not in any voice channel. Invite me first."));
-        return;
-      }
-      IGuildPlayer? player = node.players[guild.id];
-
-      if (player == null) return;
-
-      IQueuedTrack? nowPlaying = player.nowPlaying;
-      embedDetails(embed, nowPlaying);
-      // embed.title = 'Track paused';
-      // embed.description = 'Playing ${nowPlaying!.track.info?.title}'.trim();
-      // embed.fields
-      //   ..add(EmbedFieldBuilder('By', nowPlaying.track.info!.author))
-      //   ..add(EmbedFieldBuilder('Requested by', '<@${nowPlaying.requester}>'))
-      //   ..add(EmbedFieldBuilder('Duration', millisToMinutesAndSeconds(nowPlaying.track.info!.length) + ' mins'))
-      //   ..add(EmbedFieldBuilder('Link', nowPlaying.track.info!.uri));
-      node.pause(guild.id);
-      await event.interaction.message!.edit(messageBuilder);
-    } else if (action == 'resume') {
-      if (userState == null || userState?.channel == null) {
-        await event.interaction.message!.channel.sendMessage(
-          con.MessageContent.custom(
-              'You need to be connected to a voice chat to use this command'),
-        );
-        return;
-      }
-      if (botState == null && botState!.channel != null) {
-        await event.interaction.message!.channel.sendMessage(
-            MessageBuilder.content(
-                "I'm not in any voice channel. Invite me first."));
-        return;
-      }
-
-      IGuildPlayer? player = node.players[guild.id];
-
-      if (player == null) return;
-
-      IQueuedTrack? nowPlaying = player.nowPlaying;
-      embedDetails(embed, nowPlaying);
-      node.resume(guild.id);
-      await event.interaction.message!.edit(messageBuilder);
-    } else if (action == 'skip') {
-      // EmbedBuilder skipEmbed = EmbedBuilder();
-      if (userState == null || userState?.channel == null) {
-        await event.interaction.message!.channel.sendMessage(
-          con.MessageContent.custom(
-              'You need to be connected to a voice chat to use this command'),
-        );
-        return;
-      }
-      if (botState == null && botState!.channel != null) {
-        await event.interaction.message!.channel.sendMessage(
-            MessageBuilder.content(
-                "I'm not in any voice channel. Invite me first."));
-        return;
-      }
-      IGuildPlayer? player = node.players[guild.id];
-      if (player == null) {
-        await event.interaction.message!.channel
-            .sendMessage(con.MessageContent.custom('Player is empty.'));
-        return;
-      } else {
-        IQueuedTrack? nowPlaying = player.nowPlaying;
-        if (nowPlaying == null) {
-          return;
-        }
-        // skipEmbed.title = 'Track skipped';
-        // skipEmbed.description = 'Playing ${player.nowPlaying!.track.info?.title}'.trim();
-        // skipEmbed.fields
-        //   ..add(EmbedFieldBuilder('By', nowPlaying.track.info!.author))
-        //   ..add(EmbedFieldBuilder('Requested by', '<@${nowPlaying.requester}>'))
-        //   ..add(EmbedFieldBuilder('Duration', millisToMinutesAndSeconds(nowPlaying.track.info!.length) + ' mins'))
-        //   ..add(EmbedFieldBuilder('Link', nowPlaying.track.info!.uri));
-        // try {
-        //   // await event.interaction.message!.edit(noBtns
-        //   //   ..components?.clear()
-        //   //   ..embeds.clear());
-        //   // ..embeds = ;
-        // } on Exception catch (e) {
-        //   throw Exception(e.toString());
-        // }
-
-        musicMsg = await event.interaction.message!.channel.sendMessage(
-            con.MessageContent.custom('Skipping the current track.'));
-        node.skip(guild.id);
-        List<IQueuedTrack> queue = player.queue;
-        if (queue.isEmpty) {
-          await musicMsg.delete();
-          await event.interaction.message!.channel
-              .sendMessage(con.MessageContent.custom('Queue is empty.'));
-          return;
-        }
-        await musicMsg.delete();
-      }
-    } else if (action == 'seek') {
-      if (userState == null || userState?.channel == null) {
-        await event.interaction.message!.channel.sendMessage(
-          con.MessageContent.custom(
-              'You need to be connected to a voice chat to use this command'),
-        );
-        return;
-      }
-      if (botState == null && botState!.channel != null) {
-        await event.interaction.message!.channel.sendMessage(
-            MessageBuilder.content(
-                "I'm not in any voice channel. Invite me first."));
-        return;
-      }
-
-      node.seek(guild.id, const Duration(seconds: 0));
     }
+    // TODO:(@yahu1031) Add music support
+    // else if (action == 'welcome') {
+    //   try {
+    //     String actionType = id.split('_')[1];
+    //     if (actionType == 'accept') {
+    //       IRole? role;
+    //       guild.roles.forEach((Snowflake key, IRole value) {
+    //         if (value.name.toString().toLowerCase().compareTo('member') == 0) {
+    //           role = value;
+    //         }
+    //       });
+
+    //       /// Fetch the member from the guild.
+    //       IMember mem =
+    //           await guild.fetchMember(event.interaction.userAuthor!.id);
+
+    //       /// Fetch the user from the member.
+    //       IUser? user = mem.user.getFromCache();
+
+    //       /// User interacted message.
+    //       IMessage? invitationMsg = event.interaction.message;
+    //       await onRoleRequestAccept(
+    //           guild, id, mem, user!, invitationMsg!, event, role);
+    //     }
+    //   } on Exception catch (e) {
+    //     AtBotLogger.logln(LogTypeTag.error, e.toString());
+    //     return;
+    //   }
+    // } else if (action == 'pause') {
+    //   if (userState == null || userState?.channel == null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //       con.MessageContent.custom(
+    //           'You need to be connected to a voice chat to use this command'),
+    //     );
+    //     return;
+    //   }
+    //   if (botState == null && botState!.channel != null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //         MessageBuilder.content(
+    //             "I'm not in any voice channel. Invite me first."));
+    //     return;
+    //   }
+    //   IGuildPlayer? player = node.players[guild.id];
+
+    //   if (player == null) return;
+
+    //   IQueuedTrack? nowPlaying = player.nowPlaying;
+    //   embedDetails(embed, nowPlaying);
+    //   // embed.title = 'Track paused';
+    //   // embed.description = 'Playing ${nowPlaying!.track.info?.title}'.trim();
+    //   // embed.fields
+    //   //   ..add(EmbedFieldBuilder('By', nowPlaying.track.info!.author))
+    //   //   ..add(EmbedFieldBuilder('Requested by', '<@${nowPlaying.requester}>'))
+    //   //   ..add(EmbedFieldBuilder('Duration', millisToMinutesAndSeconds(nowPlaying.track.info!.length) + ' mins'))
+    //   //   ..add(EmbedFieldBuilder('Link', nowPlaying.track.info!.uri));
+    //   node.pause(guild.id);
+    //   await event.interaction.message!.edit(messageBuilder);
+    // } else if (action == 'resume') {
+    //   if (userState == null || userState?.channel == null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //       con.MessageContent.custom(
+    //           'You need to be connected to a voice chat to use this command'),
+    //     );
+    //     return;
+    //   }
+    //   if (botState == null && botState!.channel != null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //         MessageBuilder.content(
+    //             "I'm not in any voice channel. Invite me first."));
+    //     return;
+    //   }
+
+    //   IGuildPlayer? player = node.players[guild.id];
+
+    //   if (player == null) return;
+
+    //   IQueuedTrack? nowPlaying = player.nowPlaying;
+    //   embedDetails(embed, nowPlaying);
+    //   node.resume(guild.id);
+    //   await event.interaction.message!.edit(messageBuilder);
+    // } else if (action == 'skip') {
+    //   // EmbedBuilder skipEmbed = EmbedBuilder();
+    //   if (userState == null || userState?.channel == null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //       con.MessageContent.custom(
+    //           'You need to be connected to a voice chat to use this command'),
+    //     );
+    //     return;
+    //   }
+    //   if (botState == null && botState!.channel != null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //         MessageBuilder.content(
+    //             "I'm not in any voice channel. Invite me first."));
+    //     return;
+    //   }
+    //   IGuildPlayer? player = node.players[guild.id];
+    //   if (player == null) {
+    //     await event.interaction.message!.channel
+    //         .sendMessage(con.MessageContent.custom('Player is empty.'));
+    //     return;
+    //   } else {
+    //     IQueuedTrack? nowPlaying = player.nowPlaying;
+    //     if (nowPlaying == null) {
+    //       return;
+    //     }
+    //     // skipEmbed.title = 'Track skipped';
+    //     // skipEmbed.description = 'Playing ${player.nowPlaying!.track.info?.title}'.trim();
+    //     // skipEmbed.fields
+    //     //   ..add(EmbedFieldBuilder('By', nowPlaying.track.info!.author))
+    //     //   ..add(EmbedFieldBuilder('Requested by', '<@${nowPlaying.requester}>'))
+    //     //   ..add(EmbedFieldBuilder('Duration', millisToMinutesAndSeconds(nowPlaying.track.info!.length) + ' mins'))
+    //     //   ..add(EmbedFieldBuilder('Link', nowPlaying.track.info!.uri));
+    //     // try {
+    //     //   // await event.interaction.message!.edit(noBtns
+    //     //   //   ..components?.clear()
+    //     //   //   ..embeds.clear());
+    //     //   // ..embeds = ;
+    //     // } on Exception catch (e) {
+    //     //   throw Exception(e.toString());
+    //     // }
+
+    //     musicMsg = await event.interaction.message!.channel.sendMessage(
+    //         con.MessageContent.custom('Skipping the current track.'));
+    //     node.skip(guild.id);
+    //     List<IQueuedTrack> queue = player.queue;
+    //     if (queue.isEmpty) {
+    //       await musicMsg.delete();
+    //       await event.interaction.message!.channel
+    //           .sendMessage(con.MessageContent.custom('Queue is empty.'));
+    //       return;
+    //     }
+    //     await musicMsg.delete();
+    //   }
+    // } else if (action == 'seek') {
+    //   if (userState == null || userState?.channel == null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //       con.MessageContent.custom(
+    //           'You need to be connected to a voice chat to use this command'),
+    //     );
+    //     return;
+    //   }
+    //   if (botState == null && botState!.channel != null) {
+    //     await event.interaction.message!.channel.sendMessage(
+    //         MessageBuilder.content(
+    //             "I'm not in any voice channel. Invite me first."));
+    //     return;
+    //   }
+
+    //   node.seek(guild.id, const Duration(seconds: 0));
+    // }
   } catch (e) {
-    AtBotLogger.logln(LogTypeTag.error, e.toString());
-    return;
+    print(e);
+    // AtBotLogger.logln(LogTypeTag.error, e.toString());
+    throw e.toString();
   }
 }
 
