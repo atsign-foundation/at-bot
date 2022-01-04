@@ -58,7 +58,7 @@ class AtSignAPI {
     }
   }
 
-  static Future<bool> registerAtSign(String email, String atSign) async {
+  static Future<Map<String, dynamic>> registerAtSign(String email, String atSign) async {
     if (!_clientInitialized) {
       _init();
     }
@@ -76,7 +76,8 @@ class AtSignAPI {
       },
     );
     print(response.body);
-    return response.statusCode == 200 ? true : false;
+    Map<String, dynamic> responseBody = jsonDecode(response.body); 
+    return responseBody;
   }
 
   static Future<Map<String, dynamic>> validatingOTP(
@@ -135,12 +136,12 @@ class AtSignAPI {
       return null;
     }
     atsign = AtSignService.formatAtSign(atsign);
-    AtStatusImpl atStatusImpl = AtStatusImpl();
+    AtStatusImpl atStatusImpl = AtStatusImpl(rootUrl: Constants.rootDomain);
     return (await atStatusImpl.get(atsign!)).status();
   }
 
   static Future<AtStatus?> checkAtSignServerStatus(String atsign) async {
-    AtStatusImpl atStatusImpl = AtStatusImpl();
+    AtStatusImpl atStatusImpl = AtStatusImpl(rootUrl: Constants.rootDomain);
     return atStatusImpl.get(atsign);
   }
 

@@ -11,6 +11,8 @@ class Constants {
   static const String rootDomain = 'root.atsign.org';
   static const int port = 64;
   static const String domain = 'my.atsign.com';
+  static const String qrDomain = 'api.qrserver.com';
+  static const String qrPath = '/v1/create-qr-code/';
   static const String path = '/api/app/v2/';
   static const String getFreeAtSign = 'get-free-atsign';
   static const String registerAtSign = 'register-person';
