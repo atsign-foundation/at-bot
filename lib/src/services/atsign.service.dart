@@ -261,52 +261,29 @@ class AtSignService {
     return;
   }
 
-  static Future<String?> getAtSignStatus(
-      IMessageReceivedEvent event, List<String> arguments) async {
-    event.message.channel.startTypingLoop();
-    AtSignStatus? status = await AtSignAPI.checkAtsignStatus(arguments[0]);
-    event.message.channel.stopTypingLoop();
-    MessageBuilder builder = MessageBuilder();
-    builder.addEmbed((EmbedBuilder embed) {
-      embed
-        ..title = '@Sign Status'
-        ..description =
-            '***`${arguments[0]}`*** status is : ${status?.name.toUpperCase()}'
-        ..color = status?.name == 'activated'
-            ? DiscordColor.green
-            : status?.name == 'teapot'
-                ? DiscordColor.orange
-                : DiscordColor.red
-        ..addFooter((EmbedFooterBuilder footer) {
-          footer.text = 'By ' + event.message.author.username;
-          footer.iconUrl = event.message.author.avatarURL();
-        })
-        ..timestamp = DateTime.now();
-    });
-    await event.message.channel.sendMessage(builder);
-    return status?.name;
-  }
-
   static Future<void> getUserAtSign(IMessageReceivedEvent event) async {
-    event.message.channel.startTypingLoop();
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     ComponentRowBuilder componentRow = ComponentRowBuilder()
       ..addComponent(ButtonBuilder(
           'Get Random @Sign', 'singleAtSign', ComponentStyle.primary));
     // ..addComponent(ButtonBuilder(
     //     'Give me options', 'multiAtSigns', ComponentStyle.secondary));
-    // IUser? user = event.message.member?.user.getFromCache();
-    // if (user == null) {
-    //   await event.message.channel
-    //       .sendMessage(consts.MessageContent.custom('User not found'));
-    //   return;
-    // } else {
-    componentMessageBuilder.addComponentRow(componentRow);
-    await event.message.channel.sendMessage(componentMessageBuilder
-      ..content =
-          'Hey ${event.message.author.username}, We got a request from you for a new atsign.\nYou need options or get a random one?');
-    event.message.channel.stopTypingLoop();
-    return;
-    // }
+    IUser? user;
+    try {
+      user = event.message.member?.user.getFromCache();
+    } catch (e) {
+      user = event.message.author as IUser?;
+    }
+    if (user == null) {
+      await event.message.channel
+          .sendMessage(consts.MessageContent.custom('User not found'));
+      return;
+    } else {
+      componentMessageBuilder.addComponentRow(componentRow);
+      await user.sendMessage(componentMessageBuilder
+        ..content =
+            'Hey ${user.username}, We got a request from you for a new atsign.\nYou need options or get a random one?');
+      return;
+    }
   }
 }
