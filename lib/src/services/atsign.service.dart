@@ -261,6 +261,32 @@ class AtSignService {
     return;
   }
 
+  static Future<String?> getAtSignStatus(
+      IMessageReceivedEvent event, List<String> arguments) async {
+    event.message.channel.startTypingLoop();
+    AtSignStatus? status = await AtSignAPI.checkAtsignStatus(arguments[0]);
+    event.message.channel.stopTypingLoop();
+    MessageBuilder builder = MessageBuilder();
+    builder.addEmbed((EmbedBuilder embed) {
+      embed
+        ..title = '@Sign Status'
+        ..description =
+            '***`${arguments[0]}`*** status is : ${status?.name.toUpperCase()}'
+        ..color = status?.name == 'activated'
+            ? DiscordColor.green
+            : status?.name == 'teapot'
+                ? DiscordColor.orange
+                : DiscordColor.red
+        ..addFooter((EmbedFooterBuilder footer) {
+          footer.text = 'By ' + event.message.author.username;
+          footer.iconUrl = event.message.author.avatarURL();
+        })
+        ..timestamp = DateTime.now();
+    });
+    await event.message.channel.sendMessage(builder);
+    return status?.name;
+  }
+
   static Future<void> getUserAtSign(IMessageReceivedEvent event) async {
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     ComponentRowBuilder componentRow = ComponentRowBuilder()
