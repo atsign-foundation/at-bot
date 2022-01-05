@@ -10,7 +10,6 @@ Future<void> multiSelectInteraction(IMultiselectInteractionEvent event) async {
         ComponentMessageBuilder();
     emptyComponentMessageBuilder.componentRows?.clear();
     emptyComponentMessageBuilder.content = event.interaction.message!.content;
-    print(event.interaction.values.first);
     await event.interaction.message!.edit(emptyComponentMessageBuilder);
     ComponentMessageBuilder confirmMsg = ComponentMessageBuilder();
     confirmMsg.addComponentRow(

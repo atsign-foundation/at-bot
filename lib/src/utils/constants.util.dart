@@ -8,9 +8,11 @@ import 'package:dotenv/dotenv.dart';
 class Constants {
   static bool h = false;
   static IMessage? msg;
-  static const String rootDomain = 'root.atsign.org';
+  static const String prodRootDomain = 'root.atsign.org';
+  static const String devRootDomain = 'root.atsign.wtf';
   static const int port = 64;
-  static const String domain = 'my.atsign.com';
+  static const String prodDomain = 'my.atsign.com';
+  static const String devDomain = 'my.atsign.wtf';
   static const String qrDomain = 'api.qrserver.com';
   static const String qrPath = '/v1/create-qr-code/';
   static const String path = '/api/app/v2/';

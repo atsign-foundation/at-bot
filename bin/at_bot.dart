@@ -15,6 +15,7 @@ import 'package:at_bot/src/interactions/button.interaction.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/load_env.util.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
+import 'package:nyxx_interactions/src/events/interaction_event.dart';
 import 'package:riverpod/riverpod.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -57,7 +58,8 @@ Future<void> main(List<String> arguments) async {
 
     /// User interaction.
     IInteractions.create(WebsocketInteractionBackend(client!))
-      ..events.onButtonEvent.listen(buttonInteraction)
+      ..events.onButtonEvent.listen((ButtonInteractionEvent event) =>
+          buttonInteraction(event, container))
       ..events.onMultiselectEvent.listen(multiSelectInteraction)
       ..syncOnReady();
   } catch (e) {

@@ -3,6 +3,7 @@ import 'dart:async';
 
 // 📦 Package imports:
 import 'package:at_bot/src/services/get_atsign.dart';
+import 'package:at_bot/src/utils/provider.util.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
@@ -12,9 +13,9 @@ import 'package:at_bot/src/interactions/role.interaction.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart' as con;
 import 'package:nyxx_lavalink/nyxx_lavalink.dart';
+import 'package:riverpod/riverpod.dart';
 
-Future<void> buttonInteraction(IButtonInteractionEvent event,
-    {ICluster? cluster}) async {
+Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer container) async {
   try {
     // IMessage? musicMsg;
 
@@ -27,8 +28,8 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
 
     /// Get the Guild ID
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
-    bool isDev = id == 'singleAtSignDev';
     if (id.contains('singleAtSign')) {
+    bool isDev = id == 'singleAtSignDev';
       String atSign = await AtSignAPI.getNewAtsign(isDev);
       ComponentMessageBuilder emptyComponentMessageBuilder =
           ComponentMessageBuilder();
@@ -56,7 +57,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
       List<String> atSigns = <String>[];
       // generate atsigns 3 times and add atSigns to list
       for (int i = 0; atSigns.length < 3; i++) {
-        String newAtSign = await AtSignAPI.getNewAtsign(isDev);
+        String newAtSign = await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
         if (!atSigns.contains(newAtSign)) {
           atSigns.add(newAtSign);
         } else if (atSigns.length == 3) {
@@ -119,9 +120,9 @@ Future<void> buttonInteraction(IButtonInteractionEvent event,
       await event.interaction.message!.edit(emptyComponentMessageBuilder);
       await event.interaction.message!.channel.sendMessage(ComponentMessageBuilder()
         ..content =
-            'Please enter your email to activate `$selectedAtSign`.\n**NOTE :** Use `!email <email> <@sign>` to submit mail id.\nWe don\'t save any of your data.');
+            'Please enter your email to activate `$selectedAtSign`.\n**NOTE :** Use `!${container.read(isDev.state).state ? 'devemail' : 'email'} <email> <@sign>` to submit mail id.\nWe don\'t save any of your data.');
     } else if (id == 'changeAtSign') {
-      String atSign = await AtSignAPI.getNewAtsign(isDev);
+      String atSign = await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
       ComponentMessageBuilder newAtSignMsgBuilder = ComponentMessageBuilder();
       newAtSignMsgBuilder.addComponentRow(ComponentRowBuilder()
         ..addComponent(ButtonBuilder(

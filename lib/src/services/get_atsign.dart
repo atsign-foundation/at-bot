@@ -45,9 +45,10 @@ class AtSignAPI {
       _init();
     }
     http.Response wtf = await _client.get(
-      Uri.https(Constants.domain, Constants.path + Constants.getFreeAtSign),
+      Uri.https(isDev ? Constants.devDomain : Constants.prodDomain,
+          Constants.path + Constants.getFreeAtSign),
       headers: <String, String>{
-        'Authorization': !isDev ? Constants.prodApiKey() : Constants.devApiKey(),
+        'Authorization': isDev ? Constants.devApiKey() : Constants.prodApiKey(),
         'Content-Type': 'application/json',
       },
     );
@@ -61,7 +62,7 @@ class AtSignAPI {
   }
 
   static Future<Map<String, dynamic>> registerAtSign(
-      String email, String atSign) async {
+      String email, String atSign, bool isDev) async {
     if (!_clientInitialized) {
       _init();
     }
@@ -71,21 +72,20 @@ class AtSignAPI {
       'atsign': atSign
     };
     http.Response response = await _client.post(
-      Uri.https(Constants.domain, path),
+      Uri.https(isDev ? Constants.devDomain : Constants.prodDomain, path),
       body: json.encode(body),
       headers: <String, String>{
-        'Authorization': Constants.devApiKey(),
+        'Authorization': isDev ? Constants.devApiKey() : Constants.prodApiKey(),
         'Content-Type': 'application/json',
       },
     );
-    print(response.body);
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     return responseBody;
   }
 
   static Future<Map<String, dynamic>> validatingOTP(
       String atSign, String email, String otp,
-      {bool confirmation = false}) async {
+      {bool confirmation = false, required bool isDev}) async {
     if (!_clientInitialized) {
       _init();
     }
@@ -98,10 +98,10 @@ class AtSignAPI {
     };
 
     http.Response response = await _client.post(
-      Uri.https(Constants.domain, path),
+      Uri.https(isDev ? Constants.devDomain : Constants.prodDomain, path),
       body: json.encode(body),
       headers: <String, String>{
-        'Authorization': Constants.devApiKey(),
+        'Authorization': isDev ? Constants.devApiKey() : Constants.prodApiKey(),
         'Content-Type': 'application/json',
       },
     );
@@ -111,7 +111,12 @@ class AtSignAPI {
   static Future<void> initialAuthenticate(String atSign,
       {required AtClientPreference atClientPreference,
       required ProviderContainer container}) async {
-    AtLookupImpl atLookupInitialAuth = container.read(atLookupFamily(atSign));
+    bool dev = container.read(isDev.state).state;
+    // AtLookupImpl atLookupInitialAuth = container.read(atLookupFamily(atSign));
+    AtLookupImpl atLookupInitialAuth = AtLookupImpl(
+        atSign,
+        dev ? Constants.devRootDomain : Constants.prodRootDomain,
+        Constants.port);
     if (atClientPreference.cramSecret == null) {
       print('CRAM null');
     } else {
@@ -136,17 +141,26 @@ class AtSignAPI {
 
   static Future<AtSignStatus?> checkAtsignStatus(String? atsign,
       {required ProviderContainer container}) async {
+    bool dev = container.read(isDev.state).state;
     if (atsign == null) {
       return null;
     }
     atsign = AtSignService.formatAtSign(atsign);
-    AtStatusImpl atStatusImpl = container.read(atStatusProvider);
-    return (await atStatusImpl.get(atsign!)).status();
+    // AtStatusImpl atStatusImpl = container.read(atStatusProvider);
+    AtStatusImpl atStatusImpl = AtStatusImpl(
+        rootUrl: dev ? Constants.devRootDomain : Constants.prodRootDomain,
+        rootPort: Constants.port);
+    AtStatus getStatus = await atStatusImpl.get(atsign!);
+    return getStatus.status();
   }
 
   static Future<AtStatus?> checkAtSignServerStatus(String atsign,
       {required ProviderContainer container}) async {
-    AtStatusImpl atStatusImpl = container.read(atStatusProvider);
+    bool dev = container.read(isDev.state).state;
+    AtStatusImpl atStatusImpl = AtStatusImpl(
+        rootUrl: dev ? Constants.devRootDomain : Constants.prodRootDomain,
+        rootPort: Constants.port);
+    // AtStatusImpl atStatusImpl = container.read(atStatusProvider);
     return atStatusImpl.get(atsign);
   }
 
@@ -159,7 +173,7 @@ class AtSignAPI {
     preference.hiveStoragePath = '/home/at_sign/';
     preference.commitLogPath = '/home/at_sign/';
     preference.isLocalStoreRequired = true;
-    preference.rootDomain = Constants.rootDomain;
+    preference.rootDomain = Constants.prodRootDomain;
 
     AtClientManager atClientManager = await AtClientManager.getInstance()
         .setCurrentAtSign('atSign', null, preference);

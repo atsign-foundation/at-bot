@@ -20,6 +20,7 @@ class AtSignService {
   static Future<void> validateEmail(
       List<String> arguments, IMessageReceivedEvent event,
       {required ProviderContainer container}) async {
+    bool isdev = container.read(isDev.state).state;
     String email = arguments[0], atSign = arguments[1];
     event.message.channel.startTypingLoop();
     if (arguments.isEmpty) {
@@ -27,12 +28,11 @@ class AtSignService {
           consts.MessageContent.custom('Please provide an email address'));
       event.message.channel.stopTypingLoop();
       return;
-    }
-    if (arguments.length == 1) {
+    } else if (arguments.length == 1) {
       if (arguments[0] == 'help') {
         await event.message.channel.sendMessage(
           consts.MessageContent.custom(
-            'Use `!email <email> <@sign>` command to register the @sign with you email.',
+            'Use `!${isdev ? 'devemail' : 'email'} <email> <@sign>` command to register the @sign with you email.',
           ),
         );
         event.message.channel.stopTypingLoop();
@@ -61,6 +61,7 @@ class AtSignService {
     }
     String? atSignStatus =
         (await AtSignAPI.checkAtsignStatus(atSign, container: container))?.name;
+    event.message.channel.stopTypingLoop();
     if (atSignStatus == 'activated') {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
@@ -85,7 +86,7 @@ class AtSignService {
       return;
     }
     Map<String, dynamic> registered =
-        await AtSignAPI.registerAtSign(email, atSign);
+        await AtSignAPI.registerAtSign(email, atSign, isdev);
     if (registered['message'].toString().contains('Successfully')) {
       container.read(atSignMail.state).state[atSign] = email;
       await event.message.channel.sendMessage(
@@ -95,7 +96,7 @@ class AtSignService {
       );
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          'OTP will be sent to your mail shortly.\nUse `!otp <@sign> <OTP>` to verify your email.',
+          'OTP will be sent to your mail shortly.\nUse `!${isdev ? 'devotp' : 'otp'} <@sign> <OTP>` to verify your email.',
         ),
       );
       event.message.channel.stopTypingLoop();
@@ -137,7 +138,7 @@ class AtSignService {
     if (arguments.length < 2) {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          'Looks like you are missing arguments.\nTry `!otp <@sign> <OTP>` to verify your email.',
+          'Looks like you are missing arguments.\nTry `!${container.read(isDev.state).state ? 'devotp' : 'otp'} <@sign> <OTP>` to verify your email.',
         ),
       );
       event.message.channel.stopTypingLoop();
@@ -175,6 +176,7 @@ class AtSignService {
       atSign.toLowerCase(),
       email,
       otp.toUpperCase(),
+      isDev: container.read(isDev.state).state,
     );
     if (data.containsKey('data') &&
         data['data'].length != 0 &&
@@ -192,12 +194,13 @@ class AtSignService {
         email,
         otp.toUpperCase(),
         confirmation: true,
+        isDev: container.read(isDev.state).state,
       );
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
           confirmationData.containsKey('cramkey')
-              ? 'Congratulations 🎉, You own the atsign.'
-              : 'Oops!, Your @sign verification failed 💔.',
+              ? 'Congratulations 🎉, You own the ${container.read(isDev.state).state ? 'Dev-' : ''}@sign.'
+              : 'Oops!, Your ${container.read(isDev.state).state ? 'Dev-' : ''}@sign verification failed 💔.',
         ),
       );
       event.message.channel.stopTypingLoop();
@@ -234,7 +237,6 @@ class AtSignService {
         ..addFileAttachment(cramPng),
     );
     await cramPng.delete(recursive: true);
-    print('sent cram QR');
     event.message.channel.stopTypingLoop();
     return;
   }
@@ -247,7 +249,6 @@ class AtSignService {
       MessageBuilder statusBuilder = MessageBuilder();
       AtStatus? status =
           await AtSignAPI.checkAtSignServerStatus(atSign, container: container);
-      print(status?.status());
       statusBuilder.addEmbed((EmbedBuilder embed) {
         embed
           ..title = 'Root Status'

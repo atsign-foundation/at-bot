@@ -4,6 +4,7 @@ import 'dart:async';
 // 📦 Package imports:
 import 'package:at_bot/src/services/atsign.service.dart';
 import 'package:at_bot/src/utils/constants.util.dart' as consts;
+import 'package:at_bot/src/utils/provider.util.dart';
 import 'package:nyxx/nyxx.dart';
 
 // 🌎 Project imports:
@@ -22,8 +23,6 @@ Future<void> onMessageEvent(INyxxWebsocket? client,
     /// Listening on message recived.
     client.eventsWs.onMessageReceived
         .listen((IMessageReceivedEvent event) async {
-      print('wtd');
-
       /// This makes your bot ignore other bots and itself
       /// and not get into a spam loop (we call that "botception").
       if (event.message.author.bot) return;
@@ -65,26 +64,43 @@ Future<void> onMessageEvent(INyxxWebsocket? client,
           /// Check if the command is ding ping.
           case consts.Commands.getAtSign:
             if (arguments[0].toLowerCase().contains('@sign')) {
+              container.read(isDev.state).state =
+                  arguments[0].toLowerCase().contains('dev');
               await AtSignService.getUserAtSign(event);
               return;
             } else {
               break;
             }
           case 'email':
+          case 'devemail':
+            container.read(isDev.state).state =
+                command.toLowerCase()=='devemail';
             await AtSignService.validateEmail(arguments, event,
                 container: container);
             return;
           case 'status':
+          case 'devstatus':
+            container.read(isDev.state).state =
+                command.toLowerCase()=='devstatus';
             await AtSignService.getAtSignStatus(event, arguments, container);
             return;
           case 'rootstatus':
+          case 'devrootstatus':
+            container.read(isDev.state).state =
+                command.toLowerCase()=='devrootstatus';
             await AtSignService.getRootStatus(event, arguments, container);
             return;
           case 'otp':
+          case 'devotp':
+            container.read(isDev.state).state =
+                command.toLowerCase()=='devotp';
             await AtSignService.validatingOTP(event, arguments,
                 container: container);
             return;
           case 'check':
+          case 'devcheck':
+            container.read(isDev.state).state =
+                command.toLowerCase()=='devcheck';
             await AtSignService.validatingOTP(event, arguments,
                 container: container);
             return;
