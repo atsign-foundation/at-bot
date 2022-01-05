@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:at_bot/src/services/atsign.service.dart';
+import 'package:at_bot/src/utils/provider.util.dart';
 import 'package:at_commons/at_commons.dart';
 import 'package:at_server_status/at_server_status.dart';
 import 'package:crypton/crypton.dart';
@@ -12,6 +13,7 @@ import 'package:at_lookup/at_lookup.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:at_commons/at_commons.dart' as commons;
+import 'package:riverpod/riverpod.dart';
 
 import '../utils/constants.util.dart';
 
@@ -38,14 +40,14 @@ class AtSignAPI {
       HttpClient().badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
 
-  static Future<String> getNewAtsign() async {
+  static Future<String> getNewAtsign(bool isDev) async {
     if (!_clientInitialized) {
       _init();
     }
     http.Response wtf = await _client.get(
       Uri.https(Constants.domain, Constants.path + Constants.getFreeAtSign),
       headers: <String, String>{
-        'Authorization': Constants.apiKey(),
+        'Authorization': !isDev ? Constants.prodApiKey() : Constants.devApiKey(),
         'Content-Type': 'application/json',
       },
     );
@@ -58,7 +60,8 @@ class AtSignAPI {
     }
   }
 
-  static Future<Map<String, dynamic>> registerAtSign(String email, String atSign) async {
+  static Future<Map<String, dynamic>> registerAtSign(
+      String email, String atSign) async {
     if (!_clientInitialized) {
       _init();
     }
@@ -71,12 +74,12 @@ class AtSignAPI {
       Uri.https(Constants.domain, path),
       body: json.encode(body),
       headers: <String, String>{
-        'Authorization': Constants.apiKey(),
+        'Authorization': Constants.devApiKey(),
         'Content-Type': 'application/json',
       },
     );
     print(response.body);
-    Map<String, dynamic> responseBody = jsonDecode(response.body); 
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
     return responseBody;
   }
 
@@ -98,7 +101,7 @@ class AtSignAPI {
       Uri.https(Constants.domain, path),
       body: json.encode(body),
       headers: <String, String>{
-        'Authorization': Constants.apiKey(),
+        'Authorization': Constants.devApiKey(),
         'Content-Type': 'application/json',
       },
     );
@@ -106,9 +109,9 @@ class AtSignAPI {
   }
 
   static Future<void> initialAuthenticate(String atSign,
-      {required AtClientPreference atClientPreference}) async {
-    AtLookupImpl atLookupInitialAuth =
-        AtLookupImpl(atSign, Constants.rootDomain, Constants.port);
+      {required AtClientPreference atClientPreference,
+      required ProviderContainer container}) async {
+    AtLookupImpl atLookupInitialAuth = container.read(atLookupFamily(atSign));
     if (atClientPreference.cramSecret == null) {
       print('CRAM null');
     } else {
@@ -131,17 +134,19 @@ class AtSignAPI {
     return keyString;
   }
 
-  static Future<AtSignStatus?> checkAtsignStatus(String? atsign) async {
+  static Future<AtSignStatus?> checkAtsignStatus(String? atsign,
+      {required ProviderContainer container}) async {
     if (atsign == null) {
       return null;
     }
     atsign = AtSignService.formatAtSign(atsign);
-    AtStatusImpl atStatusImpl = AtStatusImpl(rootUrl: Constants.rootDomain);
+    AtStatusImpl atStatusImpl = container.read(atStatusProvider);
     return (await atStatusImpl.get(atsign!)).status();
   }
 
-  static Future<AtStatus?> checkAtSignServerStatus(String atsign) async {
-    AtStatusImpl atStatusImpl = AtStatusImpl(rootUrl: Constants.rootDomain);
+  static Future<AtStatus?> checkAtSignServerStatus(String atsign,
+      {required ProviderContainer container}) async {
+    AtStatusImpl atStatusImpl = container.read(atStatusProvider);
     return atStatusImpl.get(atsign);
   }
 

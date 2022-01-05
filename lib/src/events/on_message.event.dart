@@ -2,7 +2,6 @@
 import 'dart:async';
 
 // 📦 Package imports:
-import 'package:at_bot/src/commands/music.command.dart';
 import 'package:at_bot/src/services/atsign.service.dart';
 import 'package:at_bot/src/utils/constants.util.dart' as consts;
 import 'package:nyxx/nyxx.dart';
@@ -11,10 +10,11 @@ import 'package:nyxx/nyxx.dart';
 import 'package:at_bot/src/commands/rename.command.dart';
 import 'package:at_bot/src/commands/role.command.dart';
 import 'package:at_bot/src/services/logs.dart';
-import 'package:nyxx_lavalink/nyxx_lavalink.dart';
+import 'package:riverpod/riverpod.dart';
 
 /// Listening to every message in the guild.
-Future<void> onMessageEvent(INyxxWebsocket? client, {ICluster? cluster}) async {
+Future<void> onMessageEvent(INyxxWebsocket? client,
+    {required ProviderContainer container}) async {
   try {
     /// Check if [client] is null.
     if (client == null) throw NullThrownError();
@@ -22,6 +22,8 @@ Future<void> onMessageEvent(INyxxWebsocket? client, {ICluster? cluster}) async {
     /// Listening on message recived.
     client.eventsWs.onMessageReceived
         .listen((IMessageReceivedEvent event) async {
+      print('wtd');
+
       /// This makes your bot ignore other bots and itself
       /// and not get into a spam loop (we call that "botception").
       if (event.message.author.bot) return;
@@ -61,50 +63,30 @@ Future<void> onMessageEvent(INyxxWebsocket? client, {ICluster? cluster}) async {
             break;
 
           /// Check if the command is ding ping.
-          case consts.Commands.music:
-          case 'm':
-            await onMusicCommand(event, arguments, cluster: cluster);
-            break;
-          case consts.Commands.node:
-            if (arguments.isEmpty) {
-              await event.message.channel.sendMessage(
-                  consts.MessageContent.custom(
-                      'Kill argument to kill the nodes (Not at all prefered).'));
-            }
-            if (arguments[0] == 'kill') {
-              bool? nodesKilled = cluster?.connectedNodes.entries
-                  .any((MapEntry<int, INode> element) {
-                element.value.disconnect();
-                return true;
-              });
-              await event.message.channel.sendMessage(
-                  consts.MessageContent.custom(
-                      nodesKilled! ? 'Killed all nodes.' : 'Killed no nodes'));
-            }
-            break;
-
-          /// Check if the command is ding ping.
           case consts.Commands.getAtSign:
-            if (arguments[0].toLowerCase() == '@sign') {
+            if (arguments[0].toLowerCase().contains('@sign')) {
               await AtSignService.getUserAtSign(event);
               return;
             } else {
               break;
             }
           case 'email':
-            await AtSignService.validateEmail(arguments, event);
+            await AtSignService.validateEmail(arguments, event,
+                container: container);
             return;
           case 'status':
-            await AtSignService.getAtSignStatus(event, arguments);
+            await AtSignService.getAtSignStatus(event, arguments, container);
             return;
           case 'rootstatus':
-            await AtSignService.getRootStatus(event, arguments);
+            await AtSignService.getRootStatus(event, arguments, container);
             return;
           case 'otp':
-            await AtSignService.validatingOTP(event, arguments);
+            await AtSignService.validatingOTP(event, arguments,
+                container: container);
             return;
           case 'check':
-            await AtSignService.validatingOTP(event, arguments);
+            await AtSignService.validatingOTP(event, arguments,
+                container: container);
             return;
 
           /// Check if the command is unknown.

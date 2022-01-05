@@ -17,6 +17,8 @@ dependencies:
   nyxx: ^3.2.0
   nyxx_interactions: ^3.1.0
   nyxx_lavalink: ^3.0.0
+  riverpod: ^1.0.3
+  zxing_lib: ^0.5.0
 
 dev_dependencies:
   import_sorter: ^4.6.0

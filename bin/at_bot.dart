@@ -15,8 +15,10 @@ import 'package:at_bot/src/interactions/button.interaction.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/load_env.util.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
+import 'package:riverpod/riverpod.dart';
 
 Future<void> main(List<String> arguments) async {
+  ProviderContainer container = ProviderContainer();
   try {
     /// Load all the env variables from `.bot.env` file.
     await loadEnv();
@@ -51,7 +53,7 @@ Future<void> main(List<String> arguments) async {
     await onMemberJoined(client);
 
     /// On message from the user
-    await onMessageEvent(client);
+    await onMessageEvent(client, container: container);
 
     /// User interaction.
     IInteractions.create(WebsocketInteractionBackend(client!))

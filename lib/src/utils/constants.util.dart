@@ -17,8 +17,10 @@ class Constants {
   static const String getFreeAtSign = 'get-free-atsign';
   static const String registerAtSign = 'register-person';
   static const String validateOTP = 'validate-person';
-  static String apiKey() =>
-      env['API_KEY'] ?? const String.fromEnvironment('current-version');
+  static String devApiKey() =>
+      env['DEV_API_KEY'] ?? const String.fromEnvironment('dev-api-key');
+  static String prodApiKey() =>
+      env['PROD_API_KEY'] ?? const String.fromEnvironment('prod-api-key');
   static final RegExp emailRegExp = RegExp(
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
 

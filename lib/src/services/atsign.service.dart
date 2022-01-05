@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:at_bot/src/services/get_atsign.dart';
+import 'package:at_bot/src/utils/provider.util.dart';
 import 'package:at_server_status/at_server_status.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:http/http.dart' as http;
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:at_bot/src/utils/constants.util.dart' as consts;
+import 'package:riverpod/riverpod.dart';
 
 class AtSignService {
   // create singleton
@@ -16,7 +18,9 @@ class AtSignService {
   static final AtSignService _singleton = AtSignService._internal();
 
   static Future<void> validateEmail(
-      List<String> arguments, IMessageReceivedEvent event) async {
+      List<String> arguments, IMessageReceivedEvent event,
+      {required ProviderContainer container}) async {
+    String email = arguments[0], atSign = arguments[1];
     event.message.channel.startTypingLoop();
     if (arguments.isEmpty) {
       await event.message.channel.sendMessage(
@@ -36,7 +40,7 @@ class AtSignService {
       } else {
         await event.message.channel.sendMessage(
           consts.MessageContent.custom(
-            consts.Constants.emailRegExp.hasMatch(arguments[0])
+            consts.Constants.emailRegExp.hasMatch(email)
                 ? 'Looks like you are missing @sign.'
                 : 'Looks like you are missing your email.',
           ),
@@ -45,8 +49,8 @@ class AtSignService {
         return;
       }
     } else if (arguments.length == 2 &&
-        !consts.Constants.emailRegExp.hasMatch(arguments[0]) &&
-        arguments[1].startsWith('@')) {
+        !consts.Constants.emailRegExp.hasMatch(email) &&
+        atSign.startsWith('@')) {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
           'Looks like your email is wrong.',
@@ -56,7 +60,7 @@ class AtSignService {
       return;
     }
     String? atSignStatus =
-        (await AtSignAPI.checkAtsignStatus(arguments[1]))?.name;
+        (await AtSignAPI.checkAtsignStatus(atSign, container: container))?.name;
     if (atSignStatus == 'activated') {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
@@ -81,22 +85,27 @@ class AtSignService {
       return;
     }
     Map<String, dynamic> registered =
-        await AtSignAPI.registerAtSign(arguments[0], arguments[1]);
-    await event.message.channel.sendMessage(
-      consts.MessageContent.custom(
-        registered['message'].toString().contains('Successfully')
-            ? '***`${arguments[1]}`*** is registered on your email successfully.'
-            : registered['message'].toString(),
-      ),
-    );
+        await AtSignAPI.registerAtSign(email, atSign);
     if (registered['message'].toString().contains('Successfully')) {
+      container.read(atSignMail.state).state[atSign] = email;
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          'OTP will be sent to your mail shortly.\nUse `!otp <email> <@sign> <OTP>` to verify your email.',
+          '***`$atSign`*** is registered on your email successfully.',
+        ),
+      );
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          'OTP will be sent to your mail shortly.\nUse `!otp <@sign> <OTP>` to verify your email.',
         ),
       );
       event.message.channel.stopTypingLoop();
       return;
+    } else {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          registered['message'].toString(),
+        ),
+      );
     }
     event.message.channel.stopTypingLoop();
     return;
@@ -112,27 +121,40 @@ class AtSignService {
   }
 
   static Future<void> validatingOTP(
-      IMessageReceivedEvent event, List<String> arguments) async {
+      IMessageReceivedEvent event, List<String> arguments,
+      {required ProviderContainer container}) async {
+    String atSign = arguments[0], otp = arguments[1];
+    String? email = container.read(atSignMail.state).state[atSign];
+    if (email == null) {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          'Looks like you are not registered with this @sign.',
+        ),
+      );
+      return;
+    }
     event.message.channel.startTypingLoop();
-    if (arguments.length < 3) {
+    if (arguments.length < 2) {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          'Looks like you are missing arguments.\nTry `!otp <email> <@sign> <OTP>` to verify your email.',
+          'Looks like you are missing arguments.\nTry `!otp <@sign> <OTP>` to verify your email.',
         ),
       );
       event.message.channel.stopTypingLoop();
       return;
-    } else if (arguments.length == 2 &&
-        consts.Constants.emailRegExp.hasMatch(arguments[0]) &&
-        arguments.last.length == 4) {
-      await event.message.channel.sendMessage(
-        consts.MessageContent.custom(
-          'Looks like you are missing @sign.',
-        ),
-      );
-      event.message.channel.stopTypingLoop();
-      return;
-    } else if (arguments[2].length != 4) {
+    }
+    //  else if (arguments.length == 2 &&
+    //     consts.Constants.emailRegExp.hasMatch(email) &&
+    //     arguments.last.length == 4) {
+    //   await event.message.channel.sendMessage(
+    //     consts.MessageContent.custom(
+    //       'Looks like you are missing @sign.',
+    //     ),
+    //   );
+    //   event.message.channel.stopTypingLoop();
+    //   return;
+    // }
+    else if (otp.length != 4) {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
           '🔐 OTP is invalid.',
@@ -140,7 +162,7 @@ class AtSignService {
       );
       event.message.channel.stopTypingLoop();
       return;
-    } else if (!consts.Constants.emailRegExp.hasMatch(arguments[0])) {
+    } else if (!consts.Constants.emailRegExp.hasMatch(email)) {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
           '📨 Email is invalid.',
@@ -150,9 +172,9 @@ class AtSignService {
       return;
     }
     Map<String, dynamic> data = await AtSignAPI.validatingOTP(
-      arguments[1].toLowerCase(),
-      arguments[0],
-      arguments[2].toUpperCase(),
+      atSign.toLowerCase(),
+      email,
+      otp.toUpperCase(),
     );
     if (data.containsKey('data') &&
         data['data'].length != 0 &&
@@ -166,9 +188,9 @@ class AtSignService {
       return;
     } else if (data['data']['newAtsign'] != null) {
       Map<String, dynamic> confirmationData = await AtSignAPI.validatingOTP(
-        arguments[1].toLowerCase(),
-        arguments[0],
-        arguments[2].toUpperCase(),
+        atSign.toLowerCase(),
+        email,
+        otp.toUpperCase(),
         confirmation: true,
       );
       await event.message.channel.sendMessage(
@@ -180,7 +202,7 @@ class AtSignService {
       );
       event.message.channel.stopTypingLoop();
       if (confirmationData.containsKey('cramkey')) {
-        await _createCramQR(arguments[0], confirmationData['cramkey'], event);
+        await _createCramQR(email, confirmationData['cramkey'], event);
         event.message.channel.stopTypingLoop();
         return;
       }
@@ -211,20 +233,21 @@ class AtSignService {
       MessageBuilder.content('Here is your QR code.')
         ..addFileAttachment(cramPng),
     );
+    await cramPng.delete(recursive: true);
     print('sent cram QR');
     event.message.channel.stopTypingLoop();
     return;
   }
 
-  static Future<void> getRootStatus(
-      IMessageReceivedEvent event, List<String> arguments) async {
+  static Future<void> getRootStatus(IMessageReceivedEvent event,
+      List<String> arguments, ProviderContainer container) async {
+    String atSign = arguments[0];
     event.message.channel.startTypingLoop();
     if (event.message.guild != null) {
-      event.message.channel.startTypingLoop();
       MessageBuilder statusBuilder = MessageBuilder();
-      AtStatus? status = await AtSignAPI.checkAtSignServerStatus(arguments[0]);
+      AtStatus? status =
+          await AtSignAPI.checkAtSignServerStatus(atSign, container: container);
       print(status?.status());
-      event.message.channel.stopTypingLoop();
       statusBuilder.addEmbed((EmbedBuilder embed) {
         embed
           ..title = 'Root Status'
@@ -256,22 +279,38 @@ class AtSignService {
           ..timestamp = DateTime.now();
       });
       await event.message.channel.sendMessage(statusBuilder);
+    } else {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          'Looks like you are not in a server.',
+        ),
+      );
     }
     event.message.channel.stopTypingLoop();
     return;
   }
 
-  static Future<String?> getAtSignStatus(
-      IMessageReceivedEvent event, List<String> arguments) async {
+  static Future<String?> getAtSignStatus(IMessageReceivedEvent event,
+      List<String> arguments, ProviderContainer container) async {
+    if (event.message.guild == null) {
+      await event.message.channel.sendMessage(
+        consts.MessageContent.custom(
+          'Looks like you are not in a server.',
+        ),
+      );
+      return null;
+    }
+    String atSign = arguments[0];
     event.message.channel.startTypingLoop();
-    AtSignStatus? status = await AtSignAPI.checkAtsignStatus(arguments[0]);
+    AtSignStatus? status =
+        await AtSignAPI.checkAtsignStatus(atSign, container: container);
     event.message.channel.stopTypingLoop();
     MessageBuilder builder = MessageBuilder();
     builder.addEmbed((EmbedBuilder embed) {
       embed
         ..title = '@Sign Status'
         ..description =
-            '***`${arguments[0]}`*** status is : ${status?.name.toUpperCase()}'
+            '***`$atSign`*** status is : ${status?.name.toUpperCase()}'
         ..color = status?.name == 'activated'
             ? DiscordColor.green
             : status?.name == 'teapot'
@@ -288,10 +327,11 @@ class AtSignService {
   }
 
   static Future<void> getUserAtSign(IMessageReceivedEvent event) async {
+    bool isDev = event.message.content.contains('dev');
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     ComponentRowBuilder componentRow = ComponentRowBuilder()
-      ..addComponent(ButtonBuilder(
-          'Get Random @Sign', 'singleAtSign', ComponentStyle.primary));
+      ..addComponent(ButtonBuilder('Get Random @Sign',
+          isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary));
     // ..addComponent(ButtonBuilder(
     //     'Give me options', 'multiAtSigns', ComponentStyle.secondary));
     IUser? user;
