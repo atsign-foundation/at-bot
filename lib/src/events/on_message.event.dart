@@ -63,7 +63,8 @@ Future<void> onMessageEvent(INyxxWebsocket? client,
 
           /// Check if the command is ding ping.
           case consts.Commands.getAtSign:
-            if (arguments[0].toLowerCase().contains('@sign')) {
+            if (arguments[0].toLowerCase() == '@sign' ||
+                arguments[0].toLowerCase() == 'dev@sign') {
               container.read(isDev.state).state =
                   arguments[0].toLowerCase().contains('dev');
               await AtSignService.getUserAtSign(event);
@@ -74,33 +75,33 @@ Future<void> onMessageEvent(INyxxWebsocket? client,
           case 'email':
           case 'devemail':
             container.read(isDev.state).state =
-                command.toLowerCase()=='devemail';
+                command.toLowerCase() == 'devemail';
             await AtSignService.validateEmail(arguments, event,
                 container: container);
             return;
           case 'status':
           case 'devstatus':
             container.read(isDev.state).state =
-                command.toLowerCase()=='devstatus';
+                command.toLowerCase() == 'devstatus';
             await AtSignService.getAtSignStatus(event, arguments, container);
             return;
           case 'rootstatus':
           case 'devrootstatus':
             container.read(isDev.state).state =
-                command.toLowerCase()=='devrootstatus';
+                command.toLowerCase() == 'devrootstatus';
             await AtSignService.getRootStatus(event, arguments, container);
             return;
           case 'otp':
           case 'devotp':
             container.read(isDev.state).state =
-                command.toLowerCase()=='devotp';
+                command.toLowerCase() == 'devotp';
             await AtSignService.validatingOTP(event, arguments,
                 container: container);
             return;
           case 'check':
           case 'devcheck':
             container.read(isDev.state).state =
-                command.toLowerCase()=='devcheck';
+                command.toLowerCase() == 'devcheck';
             await AtSignService.validatingOTP(event, arguments,
                 container: container);
             return;

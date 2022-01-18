@@ -15,7 +15,8 @@ import 'package:at_bot/src/utils/constants.util.dart' as con;
 import 'package:nyxx_lavalink/nyxx_lavalink.dart';
 import 'package:riverpod/riverpod.dart';
 
-Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer container) async {
+Future<void> buttonInteraction(
+    IButtonInteractionEvent event, ProviderContainer container) async {
   try {
     // IMessage? musicMsg;
 
@@ -29,7 +30,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer 
     /// Get the Guild ID
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     if (id.contains('singleAtSign')) {
-    bool isDev = id == 'singleAtSignDev';
+      bool isDev = id == 'singleAtSignDev';
       String atSign = await AtSignAPI.getNewAtsign(isDev);
       ComponentMessageBuilder emptyComponentMessageBuilder =
           ComponentMessageBuilder();
@@ -39,10 +40,10 @@ Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer 
             isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary,
             disabled: true));
       ComponentRowBuilder componentRow = ComponentRowBuilder()
-        ..addComponent(ButtonBuilder(
-            'Change @sign', 'changeAtSign', ComponentStyle.primary))
-        ..addComponent(ButtonBuilder(
-            'Confirm', 'confirmAtSign_$atSign', ComponentStyle.success));
+        ..addComponent(
+            ButtonBuilder('Try again', 'changeAtSign', ComponentStyle.primary))
+        ..addComponent(ButtonBuilder('I like this one!',
+            'confirmAtSign_$atSign', ComponentStyle.success));
       componentMessageBuilder.addComponentRow(componentRow);
       emptyComponentMessageBuilder.componentRows?.clear();
       emptyComponentMessageBuilder.addComponentRow(selectedComponentRow);
@@ -57,7 +58,8 @@ Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer 
       List<String> atSigns = <String>[];
       // generate atsigns 3 times and add atSigns to list
       for (int i = 0; atSigns.length < 3; i++) {
-        String newAtSign = await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
+        String newAtSign =
+            await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
         if (!atSigns.contains(newAtSign)) {
           atSigns.add(newAtSign);
         } else if (atSigns.length == 3) {
@@ -107,7 +109,7 @@ Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer 
         ComponentRowBuilder()
           ..addComponent(
             ButtonBuilder(
-              'Confirm',
+              'I like this one!',
               'confirmAtSign_$selectedAtSign',
               ComponentStyle.success,
               disabled: true,
@@ -115,20 +117,21 @@ Future<void> buttonInteraction(IButtonInteractionEvent event, ProviderContainer 
           ),
       );
       emptyComponentMessageBuilder.content =
-          'Thanks for choosing `$selectedAtSign`';
+          'Awesome, You\'ve selected `$selectedAtSign`.';
       await event.acknowledge();
       await event.interaction.message!.edit(emptyComponentMessageBuilder);
       await event.interaction.message!.channel.sendMessage(ComponentMessageBuilder()
         ..content =
-            'Please enter your email to activate `$selectedAtSign`.\n**NOTE :** Use `!${container.read(isDev.state).state ? 'devemail' : 'email'} <email> <@sign>` to submit mail id.\nWe don\'t save any of your data.');
+            'Great! Please enter the email address you would like to assign `@$selectedAtSign` to.\nMake sure you have access to this email address because we\'ll be sending you a one time password in the next step!\n`!${container.read(isDev.state).state ? 'devemail' : 'email'} <email> <@sign>` to submit mail id');
     } else if (id == 'changeAtSign') {
-      String atSign = await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
+      String atSign =
+          await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
       ComponentMessageBuilder newAtSignMsgBuilder = ComponentMessageBuilder();
       newAtSignMsgBuilder.addComponentRow(ComponentRowBuilder()
         ..addComponent(ButtonBuilder(
             'Change @sign', 'changeAtSign', ComponentStyle.primary))
         ..addComponent(ButtonBuilder(
-            'Confirm', 'confirmAtSign_$atSign', ComponentStyle.success)));
+            'I like this one!', 'confirmAtSign_$atSign', ComponentStyle.success)));
       await event.acknowledge();
       await event.interaction.message!.edit(
           newAtSignMsgBuilder..content = 'Awesome, We got `$atSign` for you.');

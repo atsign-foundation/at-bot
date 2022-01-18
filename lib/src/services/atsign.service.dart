@@ -91,12 +91,12 @@ class AtSignService {
       container.read(atSignMail.state).state[atSign] = email;
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          '***`$atSign`*** is registered on your email successfully.',
+          'Almost done. We just need to verify your email address. Please check your email for a 4 character code and enter it below. If it\'s not in your inbox, check your spam/junk and promotions folders.',
         ),
       );
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
-          'OTP will be sent to your mail shortly.\nUse `!${isdev ? 'devotp' : 'otp'} <@sign> <OTP>` to verify your email.',
+          'Use `!${isdev ? 'devotp' : 'otp'} <@sign> <OTP>` to verify your email.',
         ),
       );
       event.message.channel.stopTypingLoop();
@@ -199,7 +199,7 @@ class AtSignService {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
           confirmationData.containsKey('cramkey')
-              ? 'Congratulations 🎉, You own the ${container.read(isDev.state).state ? 'Dev-' : ''}@sign.'
+              ? 'Congratulations! 🎉  You are now the proud owner of $atSign !\nIf you\'re on a laptop or desktop computer, get started with your shiny new @sign now by using an @app on your mobile device to scan the QR Code below. If you\'re on a mobile device, get started by entering the @sign into the “Setting up your account”  screen in any @app.'
               : 'Oops!, Your ${container.read(isDev.state).state ? 'Dev-' : ''}@sign verification failed 💔.',
         ),
       );
@@ -331,10 +331,11 @@ class AtSignService {
     bool isDev = event.message.content.contains('dev');
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     ComponentRowBuilder componentRow = ComponentRowBuilder()
-      ..addComponent(ButtonBuilder('Get Random @Sign',
-          isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary));
-    // ..addComponent(ButtonBuilder(
-    //     'Give me options', 'multiAtSigns', ComponentStyle.secondary));
+      ..addComponent(ButtonBuilder('Generate a free @sign',
+          isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary))
+      ..addComponent(
+        LinkButtonBuilder('Go to website', 'https://my.atsign.com/go'),
+      );
     IUser? user;
     try {
       user = event.message.member?.user.getFromCache();
@@ -349,7 +350,7 @@ class AtSignService {
       componentMessageBuilder.addComponentRow(componentRow);
       await user.sendMessage(componentMessageBuilder
         ..content =
-            'Hey ${user.username}, We got a request from you for a new atsign.\nYou need options or get a random one?');
+            'Hey ${user.username}, We received your request for a new @sign. Would you like to generate a free random @sign here or head over to our website for more options?');
       return;
     }
   }
