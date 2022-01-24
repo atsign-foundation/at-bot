@@ -246,40 +246,40 @@ class AtSignService {
     String atSign = arguments[0];
     event.message.channel.startTypingLoop();
     if (event.message.guild != null) {
-      MessageBuilder statusBuilder = MessageBuilder();
+      EmbedBuilder embed = EmbedBuilder();
       AtStatus? status =
           await AtSignAPI.checkAtSignServerStatus(atSign, container: container);
-      statusBuilder.addEmbed((EmbedBuilder embed) {
-        embed
-          ..title = 'Root Status'
-          ..description =
-              '**Root status is :** ${status?.rootStatus?.name.toUpperCase()}'
-          ..color = status?.rootStatus?.name == 'found'
-              ? DiscordColor.green
-              : DiscordColor.red
-          ..addField(
-            name: '@Sign :',
-            content: status?.atSign?.replaceAll('@', ''),
-          )
-          ..addField(
-            name: '@Sign status :',
-            content: status?.atSignStatus?.name.toUpperCase(),
-          )
-          ..addField(
-            name: 'Server location :',
-            content: status?.serverLocation,
-          )
-          ..addField(
-            name: 'Server Status :',
-            content: status?.serverStatus?.name.toUpperCase(),
-          )
-          ..addFooter((EmbedFooterBuilder footer) {
-            footer.text = 'By ' + event.message.author.username;
-            footer.iconUrl = event.message.author.avatarURL();
-          })
-          ..timestamp = DateTime.now();
-      });
-      await event.message.channel.sendMessage(statusBuilder);
+      embed
+        ..title = 'Root Status'
+        ..description =
+            '**Root status is :** ${status?.rootStatus?.name.toUpperCase()}'
+        ..color = status?.rootStatus?.name == 'found'
+            ? DiscordColor.green
+            : DiscordColor.red
+        ..addField(
+          name: '@Sign :',
+          content: status?.atSign?.replaceAll('@', ''),
+        )
+        ..addField(
+          name: '@Sign status :',
+          content: status?.atSignStatus?.name.toUpperCase(),
+        )
+        ..addField(
+          name: 'Server location :',
+          content: status?.serverLocation,
+        )
+        ..addField(
+          name: 'Server Status :',
+          content: status?.serverStatus?.name.toUpperCase(),
+        )
+        ..addFooter((EmbedFooterBuilder footer) {
+          footer.text = 'By ' + event.message.author.username;
+          footer.iconUrl = event.message.author.avatarURL();
+        })
+        ..timestamp = DateTime.now();
+      ComponentMessageBuilder messageBuilder = ComponentMessageBuilder()
+        ..embeds = <EmbedBuilder>[embed];
+      await event.message.channel.sendMessage(messageBuilder);
     } else {
       await event.message.channel.sendMessage(
         consts.MessageContent.custom(
