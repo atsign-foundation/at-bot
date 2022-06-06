@@ -1,10 +1,8 @@
 // 📦 Package imports:
-import 'package:nyxx/nyxx.dart' as nyxx;
-import 'package:nyxx/nyxx.dart';
-
 // 🌎 Project imports:
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
+import 'package:nyxx/nyxx.dart' as nyxx;
 import 'package:nyxx_interactions/nyxx_interactions.dart';
 
 Future<void> requestRoleToUser(nyxx.IMessageReceivedEvent event,
@@ -51,9 +49,9 @@ Future<void> requestRoleToUser(nyxx.IMessageReceivedEvent event,
     // nyxx.Member member = await guild.fetchMember(user!.id);
     ComponentRowBuilder componentRow = ComponentRowBuilder()
       ..addComponent(ButtonBuilder(
-          'Accept', 'req_${role!.id}_accept', ComponentStyle.success))
+          'Accept', 'req_${role!.id}_accept', nyxx.ButtonStyle.primary))
       ..addComponent(ButtonBuilder(
-          'Reject', 'req_${role.id}_reject', ComponentStyle.danger));
+          'Reject', 'req_${role.id}_reject', nyxx.ButtonStyle.danger));
     componentMessageBuilder.addComponentRow(componentRow);
 
     /// Remove the role from the member.u

@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:nyxx/nyxx.dart';
 import 'package:dotenv/dotenv.dart';
 
+import 'load_env.util.dart';
+
 /// Bot general constants
 class Constants {
   static bool h = false;
@@ -27,7 +29,7 @@ class Constants {
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
 
   /// Enviroment variables file name
-  static const String envFile = '.bot.env';
+  static const String envFile = '.env';
 
   /// Reg for finding role in user nickname
   static final RegExp _regExp = RegExp(r'\[\S*\] ');

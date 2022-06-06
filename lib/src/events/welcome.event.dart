@@ -27,7 +27,7 @@ Future<StreamSubscription<IGuildMemberAddEvent>> onMemberJoined(
           ComponentMessageBuilder();
       ComponentRowBuilder componentRow = ComponentRowBuilder()
         ..addComponent(
-            ButtonBuilder('Accept', 'welcome_accept', ComponentStyle.success));
+            ButtonBuilder('Accept', 'welcome_accept', ButtonStyle.success));
       componentMessageBuilder.addComponentRow(componentRow);
 
       /// Send member a welcome message to their inbox

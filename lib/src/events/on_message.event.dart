@@ -1,16 +1,15 @@
 // 🎯 Dart imports:
 import 'dart:async';
 
-// 📦 Package imports:
-import 'package:at_bot/src/services/atsign.service.dart';
-import 'package:at_bot/src/utils/constants.util.dart' as consts;
-import 'package:at_bot/src/utils/provider.util.dart';
-import 'package:nyxx/nyxx.dart';
-
 // 🌎 Project imports:
 import 'package:at_bot/src/commands/rename.command.dart';
 import 'package:at_bot/src/commands/role.command.dart';
+// 📦 Package imports:
+import 'package:at_bot/src/services/atsign.service.dart';
 import 'package:at_bot/src/services/logs.dart';
+import 'package:at_bot/src/utils/constants.util.dart' as consts;
+import 'package:at_bot/src/utils/provider.util.dart';
+import 'package:nyxx/nyxx.dart';
 import 'package:riverpod/riverpod.dart';
 
 /// Listening to every message in the guild.
@@ -105,12 +104,6 @@ Future<void> onMessageEvent(INyxxWebsocket? client,
             await AtSignService.validatingOTP(event, arguments,
                 container: container);
             return;
-
-          /// Check if the command is unknown.
-          default:
-            await event.message.channel
-                .sendMessage(MessageBuilder.content('Unknown command'));
-            break;
         }
       }
     });

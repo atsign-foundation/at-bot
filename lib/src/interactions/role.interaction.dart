@@ -1,11 +1,12 @@
 // 📦 Package imports:
-import 'package:dotenv/dotenv.dart';
 import 'package:nyxx/nyxx.dart' as nyxx;
 
 // 🌎 Project imports:
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
+
+import '../utils/load_env.util.dart';
 
 /// If the user accepts the role request, the bot will add the role to the user.
 Future<void> onRoleRequestAccept(

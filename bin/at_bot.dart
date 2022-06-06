@@ -3,14 +3,12 @@ import 'dart:async';
 
 // 📦 Package imports:
 import 'package:at_bot/src/interactions/multi.select.interaction.dart';
-import 'package:dotenv/dotenv.dart';
 import 'package:logging/logging.dart';
 import 'package:nyxx/nyxx.dart';
 
 // 🌎 Project imports:
 import 'package:at_bot/at_bot.dart';
 import 'package:at_bot/src/events/on_ready.event.dart';
-import 'package:at_bot/src/events/welcome.event.dart';
 import 'package:at_bot/src/interactions/button.interaction.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/load_env.util.dart';
@@ -50,7 +48,7 @@ Future<void> main(List<String> arguments) async {
     // await onMusicEvent(cluster);
 
     /// On new user joined.
-    await onMemberJoined(client);
+    // await onMemberJoined(client);
 
     /// On message from the user
     await onMessageEvent(client, container: container);

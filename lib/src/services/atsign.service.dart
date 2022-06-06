@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:at_bot/src/services/get_atsign.dart';
+import 'package:at_bot/src/utils/constants.util.dart' as consts;
 import 'package:at_bot/src/utils/provider.util.dart';
 import 'package:at_server_status/at_server_status.dart';
-import 'package:nyxx/nyxx.dart';
 import 'package:http/http.dart' as http;
+import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_interactions/nyxx_interactions.dart';
-import 'package:at_bot/src/utils/constants.util.dart' as consts;
 import 'package:riverpod/riverpod.dart';
 
 class AtSignService {
@@ -80,7 +80,7 @@ class AtSignService {
             <LinkButtonBuilder>[
               LinkButtonBuilder('Our website', 'https://my.atsign.com/go'),
             ]
-          ],
+          ].cast<ComponentRowBuilder>(),
       );
       event.message.channel.stopTypingLoop();
       return;
@@ -332,7 +332,7 @@ class AtSignService {
     ComponentMessageBuilder componentMessageBuilder = ComponentMessageBuilder();
     ComponentRowBuilder componentRow = ComponentRowBuilder()
       ..addComponent(ButtonBuilder('Generate a free @sign',
-          isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary))
+          isDev ? 'singleAtSignDev' : 'singleAtSign', ButtonStyle.primary))
       ..addComponent(
         LinkButtonBuilder('Go to website', 'https://my.atsign.com/go'),
       );
@@ -342,11 +342,7 @@ class AtSignService {
     } catch (e) {
       user = event.message.author as IUser?;
     }
-    if (user == null) {
-      await event.message.channel
-          .sendMessage(consts.MessageContent.custom('User not found'));
-      return;
-    } else {
+    if (user != null) {
       componentMessageBuilder.addComponentRow(componentRow);
       await user.sendMessage(componentMessageBuilder
         ..content =

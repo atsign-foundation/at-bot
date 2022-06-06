@@ -8,6 +8,8 @@ import 'package:dotenv/dotenv.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart';
 
+late DotEnv env;
+
 /// Load all the env variables from `.bot.env` file.
 /// If the file is not found, it will throw an exception.
 Future<void> loadEnv() async {
@@ -15,11 +17,11 @@ Future<void> loadEnv() async {
     /// Check if file exist in the current working directory.
     if (await File(Constants.envFile).exists()) {
       /// Load the env variables from the file.
-      load(Constants.envFile);
+      env = DotEnv(includePlatformEnvironment: true)..load();
 
       ///
       if (env['token'] == null) {
-        AtBotLogger.logln(LogTypeTag.error, 'Missing token in `.bot.env` file');
+        AtBotLogger.logln(LogTypeTag.error, 'Missing token in `.env` file');
         exit(-1);
       }
     } else {

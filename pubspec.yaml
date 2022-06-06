@@ -1,28 +1,28 @@
 name: at_bot
 description: The @ platform bot in dart.
-version: 1.0.0
+version: 2.0.0
 homepage: https://www.atsign.com
 
 environment:
-  sdk: ">=2.15.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
-  at_client: ^3.0.7
-  at_commons: ^3.0.2
+  at_client: ^3.0.25
+  at_commons: ^3.0.16
   at_server_status: ^1.0.3
-  crypton: ^2.0.3
-  dotenv: ^3.0.0
+  crypton: ^2.0.5
+  dotenv: ^4.0.1
   http: ^0.13.4
   intl: ^0.17.0
-  nyxx: ^3.2.0
-  nyxx_interactions: ^3.1.1
-  nyxx_lavalink: ^3.0.0
+  nyxx: ^3.4.2
+  nyxx_interactions: ^4.2.1
+  nyxx_lavalink: ^3.0.1
   riverpod: ^1.0.3
-  zxing_lib: ^0.5.0
+  zxing_lib: ^0.6.0
 
 dev_dependencies:
   import_sorter: ^4.6.0
   lints: ^1.0.0
-  test: ^1.16.0
+  test: ^1.21.1
 import_sorter:
   emojis: true

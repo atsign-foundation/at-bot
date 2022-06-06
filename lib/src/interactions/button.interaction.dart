@@ -1,19 +1,19 @@
 // 🎯 Dart imports:
 import 'dart:async';
 
-// 📦 Package imports:
-import 'package:at_bot/src/services/get_atsign.dart';
-import 'package:at_bot/src/utils/provider.util.dart';
-import 'package:dotenv/dotenv.dart';
-import 'package:nyxx/nyxx.dart';
-import 'package:nyxx_interactions/nyxx_interactions.dart';
-
 // 🌎 Project imports:
 import 'package:at_bot/src/interactions/role.interaction.dart';
+// 📦 Package imports:
+import 'package:at_bot/src/services/get_atsign.dart';
 import 'package:at_bot/src/services/logs.dart';
 import 'package:at_bot/src/utils/constants.util.dart' as con;
+import 'package:at_bot/src/utils/provider.util.dart';
+import 'package:nyxx/nyxx.dart';
+import 'package:nyxx_interactions/nyxx_interactions.dart';
 import 'package:nyxx_lavalink/nyxx_lavalink.dart';
 import 'package:riverpod/riverpod.dart';
+
+import '../utils/load_env.util.dart';
 
 Future<void> buttonInteraction(
     IButtonInteractionEvent event, ProviderContainer container) async {
@@ -37,13 +37,13 @@ Future<void> buttonInteraction(
 
       ComponentRowBuilder selectedComponentRow = ComponentRowBuilder()
         ..addComponent(ButtonBuilder('Get Random @sign',
-            isDev ? 'singleAtSignDev' : 'singleAtSign', ComponentStyle.primary,
+            isDev ? 'singleAtSignDev' : 'singleAtSign', ButtonStyle.primary,
             disabled: true));
       ComponentRowBuilder componentRow = ComponentRowBuilder()
         ..addComponent(
-            ButtonBuilder('Try again', 'changeAtSign', ComponentStyle.primary))
-        ..addComponent(ButtonBuilder('I like this one!',
-            'confirmAtSign_$atSign', ComponentStyle.success));
+            ButtonBuilder('Change @sign', 'changeAtSign', ButtonStyle.primary))
+        ..addComponent(ButtonBuilder(
+            'I like this one!', 'confirmAtSign_$atSign', ButtonStyle.success));
       componentMessageBuilder.addComponentRow(componentRow);
       emptyComponentMessageBuilder.componentRows?.clear();
       emptyComponentMessageBuilder.addComponentRow(selectedComponentRow);
@@ -71,11 +71,11 @@ Future<void> buttonInteraction(
 
       ComponentRowBuilder selectedComponentRow = ComponentRowBuilder()
         ..addComponent(ButtonBuilder(
-            'Give me options', 'multiAtSigns', ComponentStyle.secondary,
+            'Give me options', 'multiAtSigns', ButtonStyle.secondary,
             disabled: true));
       ComponentRowBuilder componentRow = ComponentRowBuilder()
         // ..addComponent(ButtonBuilder(
-        //     'Change @sign', 'changeAtSign', ComponentStyle.primary))
+        //     'Change @sign', 'changeAtSign', ButtonStyle.primary))
         ..addComponent(
           MultiselectBuilder(
             '@signDropdown',
@@ -111,7 +111,7 @@ Future<void> buttonInteraction(
             ButtonBuilder(
               'I like this one!',
               'confirmAtSign_$selectedAtSign',
-              ComponentStyle.success,
+              ButtonStyle.success,
               disabled: true,
             ),
           ),
@@ -122,16 +122,16 @@ Future<void> buttonInteraction(
       await event.interaction.message!.edit(emptyComponentMessageBuilder);
       await event.interaction.message!.channel.sendMessage(ComponentMessageBuilder()
         ..content =
-            'Great! Please enter the email address you would like to assign `@$selectedAtSign` to.\nMake sure you have access to this email address because we\'ll be sending you a one time password in the next step!\n`!${container.read(isDev.state).state ? 'devemail' : 'email'} <email> <@sign>` to submit mail id');
+            'Great! Please enter the email address you would like to assign `$selectedAtSign` to.\nMake sure you have access to this email address because we\'ll be sending you a one time password in the next step!\n`!${container.read(isDev.state).state ? 'devemail' : 'email'} <email> <@sign>` to submit mail id');
     } else if (id == 'changeAtSign') {
       String atSign =
           await AtSignAPI.getNewAtsign(container.read(isDev.state).state);
       ComponentMessageBuilder newAtSignMsgBuilder = ComponentMessageBuilder();
       newAtSignMsgBuilder.addComponentRow(ComponentRowBuilder()
+        ..addComponent(
+            ButtonBuilder('Change @sign', 'changeAtSign', ButtonStyle.primary))
         ..addComponent(ButtonBuilder(
-            'Change @sign', 'changeAtSign', ComponentStyle.primary))
-        ..addComponent(ButtonBuilder(
-            'I like this one!', 'confirmAtSign_$atSign', ComponentStyle.success)));
+            'I like this one!', 'confirmAtSign_$atSign', ButtonStyle.success)));
       await event.acknowledge();
       await event.interaction.message!.edit(
           newAtSignMsgBuilder..content = 'Awesome, We got `$atSign` for you.');

@@ -18,7 +18,7 @@ Future<void> multiSelectInteraction(IMultiselectInteractionEvent event) async {
           ButtonBuilder(
             'I like this one!',
             'confirmAtSign_$atSign',
-            nyxx.ComponentStyle.success,
+            nyxx.ButtonStyle.success,
           ),
         ),
     );

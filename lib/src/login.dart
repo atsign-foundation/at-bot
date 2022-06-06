@@ -1,8 +1,7 @@
 // 📦 Package imports:
-import 'package:nyxx/nyxx.dart';
-
 // 🌎 Project imports:
 import 'package:at_bot/src/services/logs.dart';
+import 'package:nyxx/nyxx.dart';
 
 /// Login the discord bot with the given token as parameter
 Future<INyxxWebsocket?> login(String? token, int? privilages) async {
@@ -15,7 +14,6 @@ Future<INyxxWebsocket?> login(String? token, int? privilages) async {
       cacheOptions: CacheOptions()
         ..memberCachePolicyLocation = CachePolicyLocation.all()
         ..userCachePolicyLocation = CachePolicyLocation.all(),
-      ignoreExceptions: false,
     );
   } catch (e) {
     AtBotLogger.logln(LogTypeTag.error, 'Login Exception : ${e.toString()}');
