@@ -5,6 +5,6 @@
 
 # @bot
 
-Discord bot for [The @ Platform](https://atsign.com) discord server written in [Dart](https://www.dart.dev/).
+Discord bot for [The atPlatform](https://atsign.com) discord server written in [Dart](https://www.dart.dev/).
 
 Maintainer - [Minnu](https://github.com/yahu1031)
