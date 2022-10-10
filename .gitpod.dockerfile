@@ -15,4 +15,4 @@ RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key a
 # Setting up environment according to the project.
 RUN set -ex; \
     dart --version; \
-    dart --enable-analytics
+    dart --disable-analytics
